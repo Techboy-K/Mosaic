@@ -59,7 +59,7 @@
       return;
     }
     var next=new URLSearchParams(location.search).get('next');
-    location.replace(next && /^[a-z0-9-]+\.html$/.test(next) ? next : Crew.homeFor(r.ctx));
+    location.replace(next && /^[a-z0-9-]+\.html$/.test(next) ? '/crew/'+next : Crew.homeFor(r.ctx));
   });
 
   document.getElementById('login-reset').addEventListener('click', async function(){

@@ -31,28 +31,36 @@
   };
   var FLAT_LIMIT = 4;
 
+  /* Crew links are root-absolute. A relative 'dashboard.html' resolves against
+     the *directory* of the current URL, so at /crew (no trailing slash) it
+     becomes /dashboard.html and 404s. Absolute paths hold at /crew, /crew/,
+     and /crew/dashboard alike. */
+  function u(f) { return '/crew/' + f; }
+  function stem(x) { return String(x || '').replace(/\.html$/, ''); }
+
   w.CrewShell = {
     render: function (ctx, active) {
-      var here = location.pathname.split('/').pop() || 'dashboard.html';
+      var last = stem(location.pathname.split('/').pop());
+      var here = (!last || last === 'crew') ? 'index' : last;
       var mine = ctx.pages.filter(function (k) { return PAGES[k]; });
-      var isHere = function (k) { return PAGES[k][1] === here || k === active; };
+      var isHere = function (k) { return stem(PAGES[k][1]) === here || k === active; };
 
       var nav;
       if (mine.length <= FLAT_LIMIT) {
         nav = mine.map(function (k) {
-          return '<a href="' + PAGES[k][1] + '"' + (isHere(k) ? ' aria-current="page"' : '') +
+          return '<a href="' + u(PAGES[k][1]) + '"' + (isHere(k) ? ' aria-current="page"' : '') +
                  '>' + PAGES[k][0] + '</a>'; }).join('');
       } else {
         var parts = [];
         if (mine.indexOf('dashboard') > -1)
-          parts.push('<a href="dashboard.html"' + (isHere('dashboard') ? ' aria-current="page"' : '') +
+          parts.push('<a href="' + u('dashboard.html') + '"' + (isHere('dashboard') ? ' aria-current="page"' : '') +
                      '>Dashboard</a>');
         GROUPS.forEach(function (g) {
           var items = g.pages.filter(function (k) { return mine.indexOf(k) > -1; });
           if (!items.length) return;
           if (items.length === 1) {
             var k = items[0];
-            parts.push('<a href="' + PAGES[k][1] + '"' + (isHere(k) ? ' aria-current="page"' : '') +
+            parts.push('<a href="' + u(PAGES[k][1]) + '"' + (isHere(k) ? ' aria-current="page"' : '') +
                        '>' + PAGES[k][0] + '</a>');
             return;
           }
@@ -63,7 +71,7 @@
                 '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
                 'stroke-width="3"><path d="m5 9 7 7 7-7"/></svg></button>' +
               '<div class="navgrp__m">' + items.map(function (k) {
-                return '<a href="' + PAGES[k][1] + '"' + (isHere(k) ? ' aria-current="page"' : '') +
+                return '<a href="' + u(PAGES[k][1]) + '"' + (isHere(k) ? ' aria-current="page"' : '') +
                        '>' + PAGES[k][0] + '</a>'; }).join('') + '</div>' +
             '</div>');
         });
@@ -86,7 +94,7 @@
 
       d.getElementById('crew-shell').innerHTML =
         '<header class="crew-head">' +
-          '<a class="crew-brand" href="' + (PAGES[mine[0]] || ['','#'])[1] + '">' +
+          '<a class="crew-brand" href="' + (mine[0] ? u(PAGES[mine[0]][1]) : '#') + '">' +
             '<img src="../assets/img/brand/logo.webp" alt="" width="34" height="34">' +
             '<span>MOSAIC<small>Crew</small></span></a>' +
           '<button class="crew-burger" type="button" id="crew-burger" aria-label="Menu">' +
@@ -100,7 +108,7 @@
               '<i>' + role.name + (ctx.profile.is_system_owner ? ' · owner' : '') + '</i></span>' +
             '</button>' +
             '<div class="crew-menu" id="crew-menu" hidden>' +
-              '<a href="profile.html">My profile</a>' +
+              '<a href="' + u('profile.html') + '">My profile</a>' +
               '<button type="button" id="crew-out">Sign out</button>' +
             '</div>' +
           '</div>' +

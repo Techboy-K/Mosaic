@@ -100,7 +100,7 @@
       return { ok: true, ctx: c };
     },
 
-    async signOut() { await sb.auth.signOut(); ctx = null; location.href = 'index.html'; },
+    async signOut() { await sb.auth.signOut(); ctx = null; location.href = '/crew/index.html'; },
 
     /* Gate a page. Returns the context, or redirects.
        A superadmin is never gated: "manages everything" is the definition of the
@@ -115,9 +115,9 @@
         bootError(e);
         return null;
       }
-      if (!c) { location.replace('index.html?next=' + encodeURIComponent(location.pathname.split('/').pop())); return null; }
+      if (!c) { location.replace('/crew/index.html?next=' + encodeURIComponent(location.pathname.split('/').pop())); return null; }
       if (c.level === 0) return c;
-      if (pageKey && c.pages.indexOf(pageKey) === -1) { location.replace('denied.html'); return null; }
+      if (pageKey && c.pages.indexOf(pageKey) === -1) { location.replace('/crew/denied.html'); return null; }
       return c;
     },
 
@@ -128,14 +128,14 @@
                   roles:'roles.html', restaurants:'restaurants.html', reports:'reports.html',
                   audit:'audit.html', settings:'settings.html', 'new-order':'new-order.html',
                   'quick-notes':'quick-notes.html', history:'history.html' };
-      for (var i = 0; i < c.pages.length; i++) if (map[c.pages[i]]) return map[c.pages[i]];
-      return 'denied.html';
+      for (var i = 0; i < c.pages.length; i++) if (map[c.pages[i]]) return '/crew/' + map[c.pages[i]];
+      return '/crew/denied.html';
     }
   };
 
   sb.auth.onAuthStateChange(function (evt) {
     if (evt === 'SIGNED_OUT' && !/\/crew\/(index\.html)?$/.test(location.pathname)) {
-      location.replace('index.html');
+      location.replace('/crew/index.html');
     }
   });
 

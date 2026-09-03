@@ -46,7 +46,7 @@ B.page('index.html', 'Crew sign in — Mosaic', """
       return;
     }
     var next=new URLSearchParams(location.search).get('next');
-    location.replace(next && /^[a-z0-9-]+\\.html$/.test(next) ? next : Crew.homeFor(r.ctx));
+    location.replace(next && /^[a-z0-9-]+\\.html$/.test(next) ? '/crew/'+next : Crew.homeFor(r.ctx));
   });
 
   document.getElementById('login-reset').addEventListener('click', async function(){
@@ -66,7 +66,7 @@ B.page('denied.html', 'No access — Mosaic Crew', """
   <h1 style="font-size:26px;">You don&rsquo;t have access to that page</h1>
   <p style="color:var(--muted);font-size:14px;">Your role doesn&rsquo;t include it.
      If you think that&rsquo;s wrong, ask a supervisor or an admin.</p>
-  <a class="btn btn--wine" href="index.html" id="deny-home">Back to your pages</a>
+  <a class="btn btn--wine" href="/crew/index.html" id="deny-home">Back to your pages</a>
 </div></div></main>
 """, scripts="""<script>(async function(){
   var c=await Crew.load();
@@ -84,7 +84,7 @@ B.shell_page('dashboard.html','Dashboard — Mosaic Crew','dashboard', """
 
   <div class="dgrid">
     <section class="dcard dcard--wide">
-      <div class="dcard__h"><h2>Service right now</h2><a href="monitor.html">Open monitor &rarr;</a></div>
+      <div class="dcard__h"><h2>Service right now</h2><a href="/crew/monitor.html">Open monitor &rarr;</a></div>
       <div id="dash-branches" class="dbranches"></div>
     </section>
 
@@ -94,12 +94,12 @@ B.shell_page('dashboard.html','Dashboard — Mosaic Crew','dashboard', """
     </section>
 
     <section class="dcard">
-      <div class="dcard__h"><h2>On shift</h2><a href="users.html">Staff &rarr;</a></div>
+      <div class="dcard__h"><h2>On shift</h2><a href="/crew/users.html">Staff &rarr;</a></div>
       <div id="dash-team" class="dteam"></div>
     </section>
 
     <section class="dcard dcard--wide">
-      <div class="dcard__h"><h2>Recent activity</h2><a href="audit.html">Full log &rarr;</a></div>
+      <div class="dcard__h"><h2>Recent activity</h2><a href="/crew/audit.html">Full log &rarr;</a></div>
       <div id="dash-feed" class="dfeed"></div>
     </section>
   </div>
@@ -179,9 +179,9 @@ window.pageInit = async function(c){
     var att=rows.filter(function(o){return o.status==='NEEDS_ATTENTION';}).length;
     document.getElementById('dash-alerts').innerHTML = (urgent||late||att)
       ? '<div class="dalerts">'+
-        (att?'<a class="dalert dalert--bad" href="monitor.html"><b>'+att+'</b> need attention</a>':'')+
-        (urgent?'<a class="dalert dalert--bad" href="monitor.html"><b>'+urgent+'</b> urgent</a>':'')+
-        (late?'<a class="dalert dalert--warn" href="monitor.html"><b>'+late+'</b> over 25 minutes</a>':'')+
+        (att?'<a class="dalert dalert--bad" href="/crew/monitor.html"><b>'+att+'</b> need attention</a>':'')+
+        (urgent?'<a class="dalert dalert--bad" href="/crew/monitor.html"><b>'+urgent+'</b> urgent</a>':'')+
+        (late?'<a class="dalert dalert--warn" href="/crew/monitor.html"><b>'+late+'</b> over 25 minutes</a>':'')+
         '</div>'
       : '<div class="dalerts"><span class="dalert dalert--ok">Everything is on track</span></div>';
 
@@ -191,7 +191,7 @@ window.pageInit = async function(c){
     document.getElementById('dash-branches').innerHTML = ids.map(function(rid){
       var m=rows.filter(function(o){return o.restaurant_id===rid;});
       var t=today.filter(function(o){return o.restaurant_id===rid;});
-      return '<a class="dbranch" href="monitor.html">'+
+      return '<a class="dbranch" href="/crew/monitor.html">'+
         '<div class="dbranch__t"><b>'+CrewOrders.esc(CrewOrders.restName(rid))+'</b>'+
           '<span>'+t.length+' today</span></div>'+
         '<div class="dbranch__n">'+m.length+'<i>live</i></div>'+
@@ -224,7 +224,7 @@ window.pageInit = async function(c){
     el.innerHTML=list.map(function(u){
       var r=rm[u.id]||{name:'—',color:'#7A7F8C'};
       var on=u.last_login_at && (Date.now()-new Date(u.last_login_at))<8*3600*1000;
-      return '<a class="dteam__r" href="users.html">'+
+      return '<a class="dteam__r" href="/crew/users.html">'+
         (u.avatar_path?'<img src="'+u.avatar_path+'" alt="">'
           :'<span class="dteam__av" style="background:'+r.color+'">'+
             (u.full_name||u.email).slice(0,1).toUpperCase()+'</span>')+
@@ -441,7 +441,7 @@ print('crew: roles, restaurants')
 # ─────────────────────────────────────────────── waiter: my orders
 B.shell_page('orders.html','Orders — Mosaic Crew','orders', """
   <div class="crew-title"><div><h1>Orders</h1><p id="o-sub">Your active orders</p></div>
-    <a class="btn btn--wine btn--sm" href="new-order.html">New order</a></div>
+    <a class="btn btn--wine btn--sm" href="/crew/new-order.html">New order</a></div>
   <div id="o-sound"></div>
   <div class="oq" id="o-list"><p class="crew-empty">Loading…</p></div>
 """, scripts=ORDER_JS + """<script>
@@ -475,7 +475,7 @@ window.pageInit = async function(c){
 # ─────────────────────────────────────────────── waiter: new order
 B.shell_page('new-order.html','New order — Mosaic Crew','new-order', """
   <div class="crew-title"><div><h1>New order</h1><p>Tap to add. Built for speed.</p></div>
-    <a class="btn btn--ghost btn--sm" href="quick-notes.html">Quick note instead</a></div>
+    <a class="btn btn--ghost btn--sm" href="/crew/quick-notes.html">Quick note instead</a></div>
   <div class="no-grid">
     <div>
       <div class="no-tools">
