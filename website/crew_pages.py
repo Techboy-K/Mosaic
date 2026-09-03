@@ -1093,6 +1093,11 @@ window.pageInit = async function(c){
   if(!may){ document.getElementById('m-new').hidden=true;
             document.getElementById('m-publish').hidden=true; }
 
+  /* image_path is either a bundled asset relative to the site root
+     ("assets/img/dishes/x.webp") or, once an admin uploads a photo, a full
+     Storage URL. Prefixing "../" onto the latter yields /crew/https:/... */
+  function imgSrc(p){ return /^(https?:)?\/\//.test(p) ? p : '../'+p.replace(/^\/+/,''); }
+
   async function load(){
     var r=await Promise.all([
       Crew.sb.from('menu_categories').select('*').order('sort_order'),
@@ -1111,7 +1116,7 @@ window.pageInit = async function(c){
     var mine=items.filter(function(i){return i.category_id===active;});
     document.getElementById('m-items').innerHTML= mine.length? mine.map(function(i){
       return '<div class="mitem-row'+(i.is_available?'':' is-off')+'" data-item="'+i.id+'">'+
-        (i.image_path?'<img src="../'+i.image_path+'" alt="" loading="lazy">':'<span class="ph"></span>')+
+        (i.image_path?'<img src="'+imgSrc(i.image_path)+'" alt="" loading="lazy">':'<span class="ph"></span>')+
         '<div><b>'+esc(i.name)+'</b><small>'+esc(i.description||'')+'</small></div>'+
         '<span class="pr">'+Number(i.price).toFixed(0)+'</span>'+
         (may?'<span class="edithint">&#9998; Edit</span>':'')+
@@ -1146,7 +1151,7 @@ window.pageInit = async function(c){
         '<div class="medit__grid">'+
           '<div class="medit__photo">'+
             '<div class="imgpick"><div class="imgpick__prev" id="me-prev">'+
-              (it.image_path?'<img src="'+(/^https?:/.test(it.image_path)?it.image_path:'../'+it.image_path)+'" alt="">':'<span>No photo</span>')+
+              (it.image_path?'<img src="'+imgSrc(it.image_path)+'" alt="">':'<span>No photo</span>')+
             '</div><div class="imgpick__act">'+
               '<label class="btn btn--ghost btn--sm">Choose photo'+
                 '<input type="file" id="me-img" accept="image/jpeg,image/png,image/webp" hidden></label>'+

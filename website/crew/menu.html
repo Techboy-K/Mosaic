@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=PT+Sans:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
-<link rel="stylesheet" href="../assets/css/site.css">
-<link rel="stylesheet" href="../assets/css/crew.css">
+<link rel="stylesheet" href="../assets/css/site.css?v=ed5f7ab413">
+<link rel="stylesheet" href="../assets/css/crew.css?v=d9cb6b7759">
 </head>
 <body class="crew">
 <div id="crew-shell"></div>
@@ -30,16 +30,21 @@
   <div id="m-edit"></div>
 
 </main>
-<script src="../assets/js/vendor/supabase.min.js"></script>
-<script src="../assets/js/crew/config.js"></script>
-<script src="../assets/js/crew/auth.js"></script>
-<script src="../assets/js/crew/shell.js"></script>
-<script src="../assets/js/crew/upload.js"></script>
+<script src="../assets/js/vendor/supabase.min.js?v=3ae8cfec4a"></script>
+<script src="../assets/js/crew/config.js?v=cc9b7e2b25"></script>
+<script src="../assets/js/crew/auth.js?v=ae70cafa1f"></script>
+<script src="../assets/js/crew/shell.js?v=67f627517c"></script>
+<script src="../assets/js/crew/upload.js?v=5b3aae8992"></script>
 <script>
 window.pageInit = async function(c){
   var cats=[], items=[], active=null, may=Crew.can('menu.edit');
   if(!may){ document.getElementById('m-new').hidden=true;
             document.getElementById('m-publish').hidden=true; }
+
+  /* image_path is either a bundled asset relative to the site root
+     ("assets/img/dishes/x.webp") or, once an admin uploads a photo, a full
+     Storage URL. Prefixing "../" onto the latter yields /crew/https:/... */
+  function imgSrc(p){ return /^(https?:)?\/\//.test(p) ? p : '../'+p.replace(/^\/+/,''); }
 
   async function load(){
     var r=await Promise.all([
@@ -59,7 +64,7 @@ window.pageInit = async function(c){
     var mine=items.filter(function(i){return i.category_id===active;});
     document.getElementById('m-items').innerHTML= mine.length? mine.map(function(i){
       return '<div class="mitem-row'+(i.is_available?'':' is-off')+'" data-item="'+i.id+'">'+
-        (i.image_path?'<img src="../'+i.image_path+'" alt="" loading="lazy">':'<span class="ph"></span>')+
+        (i.image_path?'<img src="'+imgSrc(i.image_path)+'" alt="" loading="lazy">':'<span class="ph"></span>')+
         '<div><b>'+esc(i.name)+'</b><small>'+esc(i.description||'')+'</small></div>'+
         '<span class="pr">'+Number(i.price).toFixed(0)+'</span>'+
         (may?'<span class="edithint">&#9998; Edit</span>':'')+
@@ -94,7 +99,7 @@ window.pageInit = async function(c){
         '<div class="medit__grid">'+
           '<div class="medit__photo">'+
             '<div class="imgpick"><div class="imgpick__prev" id="me-prev">'+
-              (it.image_path?'<img src="'+(/^https?:/.test(it.image_path)?it.image_path:'../'+it.image_path)+'" alt="">':'<span>No photo</span>')+
+              (it.image_path?'<img src="'+imgSrc(it.image_path)+'" alt="">':'<span>No photo</span>')+
             '</div><div class="imgpick__act">'+
               '<label class="btn btn--ghost btn--sm">Choose photo'+
                 '<input type="file" id="me-img" accept="image/jpeg,image/png,image/webp" hidden></label>'+
