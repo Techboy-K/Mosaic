@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roles — Mosaic Crew</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#141928">
+<link rel="icon" href="../assets/img/brand/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=PT+Sans:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/crew.css">
+</head>
+<body class="crew">
+<div id="crew-shell"></div>
+<main id="crew-main" hidden>
+
+  <div class="crew-title">
+    <div><h1>Roles</h1><p>The hierarchy is data, not code. Create a role and it appears
+      in navigation for everyone who holds it &mdash; no deploy.</p></div>
+    <button class="btn btn--wine btn--sm" type="button" id="r-new">Create role</button>
+  </div>
+  <div class="panel-c" id="r-pyramid"></div>
+  <div class="panel-c tscroll" style="margin-top:16px;padding:6px 14px 14px;" id="r-table"></div>
+  <div id="r-wizard"></div>
+
+</main>
+<script src="../assets/js/vendor/supabase.min.js"></script>
+<script src="../assets/js/crew/config.js"></script>
+<script src="../assets/js/crew/auth.js"></script>
+<script src="../assets/js/crew/shell.js"></script>
+<script src="../assets/js/crew/roles.js"></script>
+<script>
+window.pageInit = async function(c){
+  await CrewRoles.load(); CrewRoles.render();
+  var b=document.getElementById('r-new');
+  if(!Crew.can('roles.create')){ b.hidden=true; return; }
+  b.onclick=function(){ CrewRoles.wizard(c); };
+};
+</script><script>(async function(){var c = await Crew.requirePage('roles');if(!c) return;CrewShell.render(c);if (window.CrewNotify) CrewNotify.mount(c);document.getElementById("crew-main").hidden = false;if (window.pageInit) window.pageInit(c);})();</script></body>
+</html>

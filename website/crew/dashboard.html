@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard — Mosaic Crew</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#141928">
+<link rel="icon" href="../assets/img/brand/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=PT+Sans:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/crew.css">
+</head>
+<body class="crew">
+<div id="crew-shell"></div>
+<main id="crew-main" hidden>
+
+  <header class="dh">
+    <div><h1 id="dash-hi">Dashboard</h1><p id="dash-sub"></p></div>
+    <div class="dh__right"><span id="dash-clock"></span><span id="dash-day"></span></div>
+  </header>
+
+  <div id="dash-alerts"></div>
+
+  <div class="dgrid">
+    <section class="dcard dcard--wide">
+      <div class="dcard__h"><h2>Service right now</h2><a href="monitor.html">Open monitor &rarr;</a></div>
+      <div id="dash-branches" class="dbranches"></div>
+    </section>
+
+    <section class="dcard">
+      <div class="dcard__h"><h2>Today</h2></div>
+      <div id="dash-today" class="dstats"></div>
+    </section>
+
+    <section class="dcard">
+      <div class="dcard__h"><h2>On shift</h2><a href="users.html">Staff &rarr;</a></div>
+      <div id="dash-team" class="dteam"></div>
+    </section>
+
+    <section class="dcard dcard--wide">
+      <div class="dcard__h"><h2>Recent activity</h2><a href="audit.html">Full log &rarr;</a></div>
+      <div id="dash-feed" class="dfeed"></div>
+    </section>
+  </div>
+
+  <h2 class="dsec">Everything you can open</h2>
+  <div class="dash-links" id="dash-links"></div>
+
+</main>
+<script src="../assets/js/vendor/supabase.min.js"></script>
+<script src="../assets/js/crew/config.js"></script>
+<script src="../assets/js/crew/auth.js"></script>
+<script src="../assets/js/crew/shell.js"></script>
+<script src="../assets/js/crew/orders.js"></script><script>
+window.pageInit = async function(c){
+  var defs = await CrewOrders.statusDefs();
+  var h=new Date().getHours();
+  document.getElementById('dash-hi').textContent =
+    (h<12?'Good morning':h<18?'Good afternoon':'Good evening')+', '+
+    ((c.profile.full_name||'').split(' ')[0] || 'there');
+  document.getElementById('dash-sub').textContent =
+    c.roles.map(function(r){return r.name;}).join(' · ')+' · '+
+    (c.restaurants.length>1?'both branches':(c.restaurants[0]?c.restaurants[0].name:'no branch'));
+  function clock(){
+    var n=new Date();
+    document.getElementById('dash-clock').textContent=n.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('dash-day').textContent=n.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  }
+  clock(); setInterval(clock,20000);
+
+  /* stroke icons on a 24px grid, one visual family — no emoji */
+  var IC={
+    orders:'<path d="M4 5h16v14H4z"/><path d="M8 9h8"/><path d="M8 13h5"/>',
+    'new-order':'<circle cx="12" cy="12" r="8.5"/><path d="M12 8v8"/><path d="M8 12h8"/>',
+    'quick-notes':'<path d="M5 3.5h9l5 5v12H5z"/><path d="M14 3.5V9h5"/><path d="M8.5 13h7"/><path d="M8.5 16.5h4"/>',
+    kitchen:'<path d="M6 3v7a3 3 0 0 0 6 0V3"/><path d="M9 10v11"/><path d="M17 3c-1.5 2-2 4-2 6.5S16 14 17 14V3Z"/><path d="M17 14v7"/>',
+    monitor:'<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.8"/>',
+    bookings:'<rect x="3.2" y="5" width="17.6" height="16" rx="2"/><path d="M3.2 10h17.6"/><path d="M8 3v4"/><path d="M16 3v4"/>',
+    history:'<path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 4.5V9H8"/><path d="M12 7.5V12l3 2"/>',
+    menu:'<path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/>',
+    users:'<circle cx="9" cy="8" r="3.4"/><path d="M2.8 20a6.4 6.4 0 0 1 12.4 0"/><path d="M16.5 5.2a3.4 3.4 0 0 1 0 5.6"/><path d="M18 14.4a6.4 6.4 0 0 1 3.2 5.6"/>',
+    roles:'<path d="M12 3.5 21 19H3Z"/><path d="M8 14h8"/>',
+    restaurants:'<path d="M3.5 10 12 3.5 20.5 10V20h-17Z"/><path d="M9.5 20v-6h5v6"/>',
+    reports:'<path d="M4 20V9"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M21 20H3"/>',
+    audit:'<path d="M6 3.5h12v17l-6-3-6 3Z"/><path d="M9.5 9h5"/><path d="M9.5 12.5h5"/>',
+    settings:'<circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/>'
+  };
+  function icon(k){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '+
+    'stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+(IC[k]||'')+'</svg>'; }
+
+  var GROUPS=[['Service',['orders','new-order','quick-notes','kitchen']],
+              ['Floor',['monitor','bookings','history']],
+              ['Menu',['menu']],['People',['users','roles']],
+              ['Business',['restaurants','reports','audit','settings']]];
+  var NAMES={orders:'Orders','new-order':'New order','quick-notes':'Quick notes',kitchen:'Kitchen',
+    monitor:'Monitor',bookings:'Bookings',history:'History',menu:'Menu',users:'Staff',roles:'Roles',
+    restaurants:'Restaurants',reports:'Reports',audit:'Audit log',settings:'Settings'};
+  var BLURB={orders:'Your active tables','new-order':'Take an order','quick-notes':'Fast manual capture',
+    kitchen:'The pass',monitor:'Every order, live',bookings:'Reservations',history:'Completed orders',
+    menu:'Dishes and prices',users:'Who works here',roles:'Permissions and hierarchy',
+    restaurants:'Branch details',reports:'Numbers',audit:'Who changed what',settings:'System'};
+
+  document.getElementById('dash-links').innerHTML = GROUPS.map(function(g){
+    var items=g[1].filter(function(k){return c.pages.indexOf(k)>-1;});
+    if(!items.length) return '';
+    return '<div class="dlgroup"><h3>'+g[0]+'</h3><div class="dlrow">'+
+      items.map(function(k){
+        return '<a class="dtile" href="'+k+'.html">'+
+          '<span class="dtile__i">'+icon(k)+'</span>'+
+          '<span class="dtile__t"><b>'+NAMES[k]+'</b><i>'+(BLURB[k]||'')+'</i></span>'+
+        '</a>'; }).join('')+
+    '</div></div>'; }).join('');
+
+  async function refresh(){
+    var LIVE=['DRAFT','SUBMITTED','SENT_TO_KITCHEN','IN_PREPARATION','READY','SERVED','NEEDS_ATTENTION'];
+    var rows=await CrewOrders.fetchOrders(LIVE);
+    var since=new Date(); since.setHours(0,0,0,0);
+    var today=((await Crew.sb.from('orders')
+      .select('status,priority,created_at,completed_at,restaurant_id')
+      .gte('created_at',since.toISOString())).data)||[];
+
+    var urgent=rows.filter(function(o){return o.priority==='URGENT';}).length;
+    var late=rows.filter(function(o){return (Date.now()-new Date(o.created_at))/60000>25;}).length;
+    var att=rows.filter(function(o){return o.status==='NEEDS_ATTENTION';}).length;
+    document.getElementById('dash-alerts').innerHTML = (urgent||late||att)
+      ? '<div class="dalerts">'+
+        (att?'<a class="dalert dalert--bad" href="monitor.html"><b>'+att+'</b> need attention</a>':'')+
+        (urgent?'<a class="dalert dalert--bad" href="monitor.html"><b>'+urgent+'</b> urgent</a>':'')+
+        (late?'<a class="dalert dalert--warn" href="monitor.html"><b>'+late+'</b> over 25 minutes</a>':'')+
+        '</div>'
+      : '<div class="dalerts"><span class="dalert dalert--ok">Everything is on track</span></div>';
+
+    var ids=[]; rows.forEach(function(o){ if(ids.indexOf(o.restaurant_id)===-1) ids.push(o.restaurant_id); });
+    (c.restaurants||[]).forEach(function(r){ if(ids.indexOf(r.id)===-1) ids.push(r.id); });
+    ids.sort(function(a,b){return CrewOrders.restName(a).localeCompare(CrewOrders.restName(b));});
+    document.getElementById('dash-branches').innerHTML = ids.map(function(rid){
+      var m=rows.filter(function(o){return o.restaurant_id===rid;});
+      var t=today.filter(function(o){return o.restaurant_id===rid;});
+      return '<a class="dbranch" href="monitor.html">'+
+        '<div class="dbranch__t"><b>'+CrewOrders.esc(CrewOrders.restName(rid))+'</b>'+
+          '<span>'+t.length+' today</span></div>'+
+        '<div class="dbranch__n">'+m.length+'<i>live</i></div>'+
+        '<div class="dbranch__bar">'+
+          ['SUBMITTED','SENT_TO_KITCHEN','IN_PREPARATION','READY'].map(function(k){
+            var n=m.filter(function(o){return o.status===k;}).length;
+            return '<span'+(n?' class="on"':'')+' style="--c:'+defs[k].colour+'">'+
+              '<em>'+n+'</em>'+defs[k].label+'</span>'; }).join('')+
+        '</div></a>'; }).join('') || '<p class="crew-empty">No branches assigned.</p>';
+
+    var done=today.filter(function(o){return o.completed_at;});
+    var avg=done.length?Math.round(done.reduce(function(s,o){
+      return s+(new Date(o.completed_at)-new Date(o.created_at))/60000;},0)/done.length):0;
+    document.getElementById('dash-today').innerHTML=
+      [['Orders taken',today.length],['Completed',done.length],
+       ['Still live',rows.length],['Avg minutes',avg||'—']]
+      .map(function(x){return '<div class="dstat"><b>'+x[1]+'</b><span>'+x[0]+'</span></div>';}).join('');
+  }
+
+  async function team(){
+    var el=document.getElementById('dash-team');
+    if(!Crew.can('users.view')){ el.innerHTML='<p class="crew-empty">Not visible to your role.</p>'; return; }
+    var p=(await Crew.sb.from('profiles')
+      .select('id,full_name,email,avatar_path,is_active,last_login_at')).data||[];
+    var ur=(await Crew.sb.from('user_roles').select('user_id, roles(name,color,hierarchy_level)')).data||[];
+    var rm={}; ur.forEach(function(x){rm[x.user_id]=x.roles;});
+    var list=p.filter(function(u){return u.is_active;})
+      .sort(function(a,b){return ((rm[a.id]||{}).hierarchy_level||999)-((rm[b.id]||{}).hierarchy_level||999);})
+      .slice(0,8);
+    el.innerHTML=list.map(function(u){
+      var r=rm[u.id]||{name:'—',color:'#7A7F8C'};
+      var on=u.last_login_at && (Date.now()-new Date(u.last_login_at))<8*3600*1000;
+      return '<a class="dteam__r" href="users.html">'+
+        (u.avatar_path?'<img src="'+u.avatar_path+'" alt="">'
+          :'<span class="dteam__av" style="background:'+r.color+'">'+
+            (u.full_name||u.email).slice(0,1).toUpperCase()+'</span>')+
+        '<span class="dteam__n"><b>'+CrewOrders.esc((u.full_name||u.email.split('@')[0]))+'</b>'+
+        '<i>'+CrewOrders.esc(r.name)+'</i></span>'+
+        '<span class="dteam__d'+(on?' is-on':'')+'"></span></a>'; }).join('')
+      || '<p class="crew-empty">No active staff.</p>';
+  }
+
+  async function feed(){
+    var el=document.getElementById('dash-feed');
+    if(!Crew.can('audit.view')){ el.innerHTML='<p class="crew-empty">Not visible to your role.</p>'; return; }
+    var a=(await Crew.sb.from('audit_logs').select('*')
+      .order('created_at',{ascending:false}).limit(6)).data||[];
+    el.innerHTML=a.length? a.map(function(x){
+      return '<div class="dfeed__r"><span class="dfeed__a">'+
+        CrewOrders.esc((x.actor_email||'system').split('@')[0])+'</span>'+
+        '<code>'+x.action+'</code>'+
+        '<time>'+new Date(x.created_at).toLocaleTimeString('en-GB',
+          {hour:'2-digit',minute:'2-digit'})+'</time></div>'; }).join('')
+      : '<p class="crew-empty">Nothing logged yet.</p>';
+  }
+
+  await refresh(); team(); feed();
+  CrewOrders.watch(refresh);
+  setInterval(refresh,45000);
+};
+</script><script>(async function(){var c = await Crew.requirePage('dashboard');if(!c) return;CrewShell.render(c);if (window.CrewNotify) CrewNotify.mount(c);document.getElementById("crew-main").hidden = false;if (window.pageInit) window.pageInit(c);})();</script></body>
+</html>

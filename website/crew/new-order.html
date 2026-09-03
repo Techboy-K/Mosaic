@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>New order — Mosaic Crew</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#141928">
+<link rel="icon" href="../assets/img/brand/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=PT+Sans:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/crew.css">
+</head>
+<body class="crew">
+<div id="crew-shell"></div>
+<main id="crew-main" hidden>
+
+  <div class="crew-title"><div><h1>New order</h1><p>Tap to add. Built for speed.</p></div>
+    <a class="btn btn--ghost btn--sm" href="quick-notes.html">Quick note instead</a></div>
+  <div class="no-grid">
+    <div>
+      <div class="no-tools">
+        <input id="no-search" type="search" placeholder="Search the menu…" aria-label="Search menu">
+        <div class="no-cats" id="no-cats"></div>
+      </div>
+      <div class="no-items" id="no-items"><p class="crew-empty">Loading menu…</p></div>
+    </div>
+    <aside class="no-cart panel-c">
+      <h2>This order</h2>
+      <label class="fld"><span>Table</span><input id="no-table" placeholder="e.g. 12"></label>
+      <div id="no-lines"><p class="crew-empty" style="padding:20px 0">Nothing yet</p></div>
+      <label class="fld"><span>Notes for the kitchen</span>
+        <textarea id="no-notes" placeholder="Allergies, timing, birthday…"></textarea></label>
+      <div class="no-total"><span>Total</span><b id="no-total">AED 0</b></div>
+      <button class="btn btn--wine" id="no-submit" style="width:100%">Submit order</button>
+    </aside>
+  </div>
+
+</main>
+<script src="../assets/js/vendor/supabase.min.js"></script>
+<script src="../assets/js/crew/config.js"></script>
+<script src="../assets/js/crew/auth.js"></script>
+<script src="../assets/js/crew/shell.js"></script>
+<script src="../assets/js/crew/orders.js"></script><script>
+window.pageInit = async function(c){
+  var cart={}, cats=[], items=[], active='all';
+  var r = await Promise.all([
+    Crew.sb.from('menu_categories').select('*').eq('is_active',true).order('sort_order'),
+    Crew.sb.from('menu_items').select('*').eq('is_available',true).order('sort_order')
+  ]);
+  cats=r[0].data||[]; items=r[1].data||[];
+  var byCat={}; items.forEach(function(i){(byCat[i.category_id]=byCat[i.category_id]||[]).push(i);});
+
+  document.getElementById('no-cats').innerHTML =
+    '<button class="nochip is-on" data-c="all">All</button>' +
+    cats.map(function(x){ return '<button class="nochip" data-c="'+x.id+'">'+CrewOrders.esc(x.name)+'</button>'; }).join('');
+
+  function visible(){
+    var q=(document.getElementById('no-search').value||'').toLowerCase();
+    return items.filter(function(i){
+      if(active!=='all' && i.category_id!==active) return false;
+      return !q || i.name.toLowerCase().indexOf(q)>-1;
+    });
+  }
+  function drawItems(){
+    document.getElementById('no-items').innerHTML = visible().map(function(i){
+      var n=cart[i.id]?cart[i.id].qty:0;
+      return '<button class="noitem'+(n?' is-in':'')+'" data-add="'+i.id+'">'+
+        '<span>'+CrewOrders.esc(i.name)+'</span>'+
+        '<i>'+Number(i.price).toFixed(0)+'</i>'+
+        (n?'<em>'+n+'</em>':'')+'</button>'; }).join('')
+        || '<p class="crew-empty">Nothing matches.</p>';
+    document.querySelectorAll('[data-add]').forEach(function(b){
+      b.onclick=function(){
+        var it=items.filter(function(x){return x.id===b.dataset.add;})[0];
+        cart[it.id]=cart[it.id]||{item:it,qty:0,notes:''};
+        cart[it.id].qty++; drawItems(); drawCart(); };});
+  }
+  function drawCart(){
+    var ks=Object.keys(cart);
+    document.getElementById('no-lines').innerHTML = ks.length ? ks.map(function(k){
+      var l=cart[k];
+      return '<div class="noline"><b>'+l.qty+'&times;</b><span>'+CrewOrders.esc(l.item.name)+
+        '<input placeholder="note" value="'+CrewOrders.esc(l.notes)+'" data-note="'+k+'"></span>'+
+        '<button data-less="'+k+'" aria-label="One fewer">&minus;</button>'+
+        '<button data-more="'+k+'" aria-label="One more">+</button></div>'; }).join('')
+      : '<p class="crew-empty" style="padding:20px 0">Nothing yet</p>';
+    var t=ks.reduce(function(s,k){return s+cart[k].qty*Number(cart[k].item.price);},0);
+    document.getElementById('no-total').textContent='AED '+t.toFixed(0);
+    document.querySelectorAll('[data-more]').forEach(function(b){b.onclick=function(){cart[b.dataset.more].qty++;drawItems();drawCart();};});
+    document.querySelectorAll('[data-less]').forEach(function(b){b.onclick=function(){
+      var k=b.dataset.less; if(--cart[k].qty<=0) delete cart[k]; drawItems(); drawCart();};});
+    document.querySelectorAll('[data-note]').forEach(function(i){i.oninput=function(){cart[i.dataset.note].notes=i.value;};});
+  }
+  document.getElementById('no-search').oninput=drawItems;
+  document.getElementById('no-cats').onclick=function(e){
+    var b=e.target.closest('[data-c]'); if(!b) return;
+    active=b.dataset.c;
+    document.querySelectorAll('.nochip').forEach(function(x){x.classList.toggle('is-on',x===b);});
+    drawItems(); };
+  drawItems(); drawCart();
+
+  document.getElementById('no-submit').onclick=async function(){
+    var ks=Object.keys(cart); if(!ks.length) return alert('Add at least one item.');
+    var rid = (CrewShell.restaurant()!=='all' ? CrewShell.restaurant() : (c.restaurants[0]||{}).id);
+    if(!rid) return alert('Pick a branch first.');
+    var btn=this; btn.disabled=true; btn.textContent='Submitting…';
+    var o=await Crew.sb.from('orders').insert({
+      restaurant_id:rid, table_label:document.getElementById('no-table').value||null,
+      created_by:c.user.id, owner_id:c.user.id,
+      notes:document.getElementById('no-notes').value||null }).select().single();
+    if(o.error){ btn.disabled=false; btn.textContent='Submit order'; return alert(o.error.message); }
+    await Crew.sb.from('order_items').insert(ks.map(function(k){
+      return { order_id:o.data.id, item_id:cart[k].item.id, name:cart[k].item.name,
+               unit_price:cart[k].item.price, qty:cart[k].qty, notes:cart[k].notes||null }; }));
+    await Crew.sb.rpc('transition_order',{p_order:o.data.id,p_to:'SUBMITTED',p_meta:{}});
+    await Crew.sb.rpc('transition_order',{p_order:o.data.id,p_to:'SENT_TO_KITCHEN',p_meta:{}});
+    location.href='orders.html';
+  };
+};
+</script><script>(async function(){var c = await Crew.requirePage('new-order');if(!c) return;CrewShell.render(c);if (window.CrewNotify) CrewNotify.mount(c);document.getElementById("crew-main").hidden = false;if (window.pageInit) window.pageInit(c);})();</script></body>
+</html>

@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu — Mosaic Crew</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#141928">
+<link rel="icon" href="../assets/img/brand/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=PT+Sans:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/crew.css">
+</head>
+<body class="crew">
+<div id="crew-shell"></div>
+<main id="crew-main" hidden>
+
+  <div class="crew-title"><div><h1>Menu</h1>
+    <p>The operational menu. Changes here drive the waiter's order screen straight away;
+       the public website updates when you publish.</p></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn--ghost btn--sm" id="m-new">Add item</button>
+      <button class="btn btn--wine btn--sm" id="m-publish">Publish to website</button></div></div>
+  <div class="mcms">
+    <aside class="mcat-list" id="m-cats"></aside>
+    <div><div id="m-items" class="panel-c" style="overflow:hidden"></div></div>
+  </div>
+  <div id="m-edit"></div>
+
+</main>
+<script src="../assets/js/vendor/supabase.min.js"></script>
+<script src="../assets/js/crew/config.js"></script>
+<script src="../assets/js/crew/auth.js"></script>
+<script src="../assets/js/crew/shell.js"></script>
+<script src="../assets/js/crew/upload.js"></script>
+<script>
+window.pageInit = async function(c){
+  var cats=[], items=[], active=null, may=Crew.can('menu.edit');
+  if(!may){ document.getElementById('m-new').hidden=true;
+            document.getElementById('m-publish').hidden=true; }
+
+  async function load(){
+    var r=await Promise.all([
+      Crew.sb.from('menu_categories').select('*').order('sort_order'),
+      Crew.sb.from('menu_items').select('*').order('sort_order')]);
+    cats=r[0].data||[]; items=r[1].data||[];
+    if(!active && cats.length) active=cats[0].id;
+  }
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(x){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[x];});}
+
+  function draw(){
+    document.getElementById('m-cats').innerHTML=cats.map(function(x){
+      var n=items.filter(function(i){return i.category_id===x.id;}).length;
+      return '<button data-cat="'+x.id+'" class="'+(x.id===active?'is-on':'')+'">'+
+        esc(x.name)+'<i>'+n+'</i></button>'; }).join('');
+    var mine=items.filter(function(i){return i.category_id===active;});
+    document.getElementById('m-items').innerHTML= mine.length? mine.map(function(i){
+      return '<div class="mitem-row'+(i.is_available?'':' is-off')+'" data-item="'+i.id+'">'+
+        (i.image_path?'<img src="../'+i.image_path+'" alt="" loading="lazy">':'<span class="ph"></span>')+
+        '<div><b>'+esc(i.name)+'</b><small>'+esc(i.description||'')+'</small></div>'+
+        '<span class="pr">'+Number(i.price).toFixed(0)+'</span>'+
+        (may?'<span class="edithint">&#9998; Edit</span>':'')+
+        (may?'<button class="mtoggle" aria-pressed="'+i.is_available+'" data-av="'+i.id+
+             '" aria-label="Availability"></button>':'')+
+      '</div>'; }).join('') : '<p class="crew-empty">No items in this category.</p>';
+
+    document.querySelectorAll('[data-cat]').forEach(function(b){
+      b.onclick=function(){ active=b.dataset.cat; draw(); };});
+    document.querySelectorAll('[data-av]').forEach(function(b){
+      b.onclick=async function(e){
+        e.stopPropagation();
+        var id=b.dataset.av, now=b.getAttribute('aria-pressed')==='true';
+        var r=await Crew.sb.from('menu_items').update({is_available:!now}).eq('id',id);
+        if(r.error) return alert(r.error.message);
+        items.filter(function(i){return i.id===id;})[0].is_available=!now;
+        await Crew.sb.from('audit_logs').insert({actor_id:c.user.id,actor_email:c.profile.email,
+          action:'menu.availability',resource:'menu_items',resource_id:id,after:{is_available:!now}});
+        draw(); };});
+    if(may) document.querySelectorAll('[data-item]').forEach(function(row){
+      row.onclick=function(){ edit(items.filter(function(i){return i.id===row.dataset.item;})[0]); };});
+  }
+
+  function edit(it){
+    var isNew=!it;
+    it=it||{name:'',description:'',price:0,category_id:active,is_available:true};
+    var host=document.getElementById('m-edit');
+    host.innerHTML='<div class="udrawer__veil" data-x></div><aside class="udrawer__p" role="dialog" aria-modal="true">'+
+      '<header><h2>'+(it.id?'Edit dish':'New dish')+'</h2>'+
+        '<button type="button" data-x aria-label="Close">&times;</button></header>'+
+      '<div class="udrawer__b"><div class="medit">'+
+        '<div class="medit__grid">'+
+          '<div class="medit__photo">'+
+            '<div class="imgpick"><div class="imgpick__prev" id="me-prev">'+
+              (it.image_path?'<img src="'+(/^https?:/.test(it.image_path)?it.image_path:'../'+it.image_path)+'" alt="">':'<span>No photo</span>')+
+            '</div><div class="imgpick__act">'+
+              '<label class="btn btn--ghost btn--sm">Choose photo'+
+                '<input type="file" id="me-img" accept="image/jpeg,image/png,image/webp" hidden></label>'+
+              '<p id="me-imgmsg" class="crew-note" style="text-align:center;margin:0">JPEG, PNG or WebP</p>'+
+            '</div></div>'+
+          '</div>'+
+          '<div class="medit__fields">'+
+            '<label class="fld"><span>Dish name</span>'+
+              '<input id="me-name" value="'+esc(it.name||'')+'" placeholder="Hommos Beiruti"></label>'+
+            '<label class="fld"><span>Description</span>'+
+              '<textarea id="me-desc" placeholder="What is in it, in one line">'+esc(it.description||'')+'</textarea></label>'+
+            '<div class="medit__row2">'+
+              '<label class="fld"><span>Price (AED)</span>'+
+                '<input id="me-price" type="number" step="1" min="0" value="'+(it.price!=null?it.price:'')+'"></label>'+
+              '<label class="fld"><span>Category</span><select id="me-cat">'+
+                cats.map(function(k){return '<option value="'+k.id+'"'+
+                  (k.id===(it.category_id||active)?' selected':'')+'>'+esc(k.name)+'</option>';}).join('')+
+              '</select></label>'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="medit__toggle">'+
+          '<span><b>Show on the menu</b><span>Hidden dishes stay in the system but cannot be ordered.</span></span>'+
+          '<label class="sw"><input type="checkbox" id="me-av"'+(it.is_available!==false?' checked':'')+'><i></i></label>'+
+        '</div>'+
+        '<div class="medit__foot">'+
+          '<button class="btn btn--wine btn--sm" type="button" id="me-save">Save changes</button>'+
+          (it.id?'<button class="btn btn--ghost btn--sm" type="button" id="me-dup">Duplicate</button>':'')+
+          (it.id?'<button class="btn btn--ghost btn--sm medit__danger" type="button" id="me-del">Delete</button>':'')+
+        '</div>'+
+      '</div></div></aside>';
+    host.classList.add('is-open');
+    host.querySelectorAll('[data-x]').forEach(function(b){b.onclick=function(){host.classList.remove('is-open');};});
+
+    var newImagePath = null;
+    var fi=document.getElementById('me-img');
+    fi.onchange=async function(){
+      var msg=document.getElementById('me-imgmsg');
+      msg.textContent='Uploading…';
+      var r=await CrewUpload.image(fi.files[0],'menu-images',{prefix:'dishes',maxPx:1400});
+      if(r.error){ msg.textContent=r.error; msg.style.color='var(--bad)'; return; }
+      newImagePath=r.url;
+      msg.textContent='Uploaded ('+Math.round(r.size/1024)+' KB)'; msg.style.color='var(--ok)';
+      document.getElementById('me-prev').innerHTML='<img src="'+r.url+'" alt="">';
+    };
+
+    function payload(){ return {
+      name:document.getElementById('me-name').value.trim(),
+      description:document.getElementById('me-desc').value.trim(),
+      price:parseFloat(document.getElementById('me-price').value)||0,
+      category_id:document.getElementById('me-cat').value,
+      is_available:document.getElementById('me-av').checked,
+      image_path: newImagePath || it.image_path || null }; }
+
+    document.getElementById('me-save').onclick=async function(){
+      var p=payload(); if(!p.name) return alert('Name is required.');
+      var r = isNew ? await Crew.sb.from('menu_items').insert(p)
+                    : await Crew.sb.from('menu_items').update(p).eq('id',it.id);
+      if(r.error) return alert(r.error.message);
+      await Crew.sb.from('audit_logs').insert({actor_id:c.user.id,actor_email:c.profile.email,
+        action:isNew?'menu.created':'menu.updated',resource:'menu_items',
+        resource_id:it.id||null,after:p});
+      host.classList.remove('is-open'); await load(); draw(); };
+
+    if(!isNew){
+      document.getElementById('me-dup').onclick=async function(){
+        var p=payload(); p.name=p.name+' (copy)';
+        var r=await Crew.sb.from('menu_items').insert(p);
+        if(r.error) return alert(r.error.message);
+        host.classList.remove('is-open'); await load(); draw(); };
+      document.getElementById('me-del').onclick=async function(){
+        if(!confirm('Delete "'+it.name+'"? This cannot be undone.')) return;
+        var r=await Crew.sb.from('menu_items').delete().eq('id',it.id);
+        if(r.error) return alert(r.error.message);
+        await Crew.sb.from('audit_logs').insert({actor_id:c.user.id,actor_email:c.profile.email,
+          action:'menu.deleted',resource:'menu_items',resource_id:it.id,before:{name:it.name}});
+        host.classList.remove('is-open'); await load(); draw(); };
+    }
+  }
+
+  document.getElementById('m-new').onclick=function(){ edit(null); };
+  document.getElementById('m-publish').onclick=async function(){
+    var b=this; b.disabled=true; b.textContent='Building…';
+    var out={currency:'AED',categories:cats.map(function(x){
+      return {name:x.name,slug:x.slug,count:0,items:items
+        .filter(function(i){return i.category_id===x.id && i.is_available;})
+        .map(function(i){return {id:i.external_id||i.id,name:i.name,desc:i.description,
+          price:Number(i.price),img:i.image_path,url:'',inStock:i.is_available};})};})};
+    out.categories.forEach(function(c2){c2.count=c2.items.length;});
+    var blob=new Blob([JSON.stringify(out)],{type:'application/json'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download='menu.json'; a.click();
+    await Crew.sb.from('audit_logs').insert({actor_id:c.user.id,actor_email:c.profile.email,
+      action:'menu.published',resource:'menu',after:{items:items.filter(function(i){return i.is_available;}).length}});
+    b.disabled=false; b.textContent='Publish to website';
+    alert('menu.json downloaded. Drop it into website/data/ to update the public site.');
+  };
+
+  await load(); draw();
+};
+</script><script>(async function(){var c = await Crew.requirePage('menu');if(!c) return;CrewShell.render(c);if (window.CrewNotify) CrewNotify.mount(c);document.getElementById("crew-main").hidden = false;if (window.pageInit) window.pageInit(c);})();</script></body>
+</html>

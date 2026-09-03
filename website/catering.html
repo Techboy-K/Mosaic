@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catering — Mosaic Lebanese Restaurant</title>
+<meta name="description" content="Mosaic Catering: corporate events, weddings, receptions and Ramadan iftar in Abu Dhabi. Personalised Lebanese menus, priced per head.">
+<meta name="theme-color" content="#39497C">
+<meta property="og:title" content="Catering — Mosaic Lebanese Restaurant">
+<meta property="og:description" content="Mosaic Catering: corporate events, weddings, receptions and Ramadan iftar in Abu Dhabi. Personalised Lebanese menus, priced per head.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/img/rooms/table.webp">
+<link rel="icon" href="assets/img/brand/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=PT+Sans:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="assets/css/site.css">
+<style>
+
+.branch-cards{display:flex;flex-direction:column;gap:clamp(18px,2.4vw,28px);}
+  .branch-card{display:none;}
+  .branch-card.is-active{display:flex;}
+.timegrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;}.timegrid{grid-template-columns:repeat(3,minmax(0,1fr));}
+.slot{min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--hair);
+  border-radius:var(--r);background:var(--paper);color:var(--ink-2);font:inherit;font-size:14px;cursor:pointer;transition:.2s;}
+.slot:hover{border-color:var(--gold);color:var(--ink);}
+.slot[aria-pressed="true"]{background:var(--wine);color:#FFF3E6;border-color:var(--wine);}
+.branchpick{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.branchpick button{display:flex;flex-direction:column;gap:3px;align-items:flex-start;padding:15px 17px;
+  border:1px solid var(--hair);border-radius:5px;background:var(--paper);color:var(--ink);cursor:pointer;font:inherit;text-align:left;}
+.branchpick button[aria-pressed="true"]{border-color:var(--gold);background:var(--gold-p);}
+.branchpick small{color:var(--faint);font-size:12px;}
+.faq{display:flex;flex-direction:column;}
+.faq details{border-bottom:1px solid var(--hair);padding:20px 0;}
+.faq summary{font-family:var(--display);font-size:clamp(18px,2.2vw,22px);cursor:pointer;list-style:none;
+  display:flex;justify-content:space-between;gap:18px;align-items:center;}
+.faq summary::-webkit-details-marker{display:none;}
+.faq summary::after{content:"+";color:var(--gold);font-family:var(--sans);font-size:20px;}
+.faq details[open] summary::after{content:"–";}
+.faq p{margin-top:11px;color:var(--muted);font-size:15px;max-width:660px;}
+@media(max-width:560px){.formgrid{grid-template-columns:1fr;}}@media(min-width:901px){
+  .branch-card{display:none;}
+  .branch-card.is-active{display:flex;}
+}@media(max-width:620px){.timegrid{grid-template-columns:repeat(3,minmax(0,1fr));}}</style></head>
+<body class="">
+<header class="site-head">
+  <a class="brand" href="index.html">
+    <img src="assets/img/brand/logo.webp" alt="" width="44" height="44">
+    <span><span class="brand__name">MOSAIC</span><span class="brand__sub">Lebanese Restaurant</span></span>
+    <span class="visually-hidden">Mosaic Lebanese Restaurant — home</span>
+  </a>
+  <nav class="nav" aria-label="Primary"><a href="menu.html">Menu</a><a href="story.html">Our Story</a><a href="catering.html" aria-current="page">Catering</a><a href="awards.html">Awards</a><a href="contact.html">Contact</a></nav>
+  <div class="head-actions">
+    <a class="btn btn--ghost btn--sm" href="menu.html">Order Online</a>
+    <a class="btn btn--primary btn--sm" href="contact.html#book">Book a Table</a>
+    <button class="cart-btn" type="button" data-cart-open aria-label="Open your order"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h3l2.4 12.2a1.6 1.6 0 0 0 1.6 1.3h8.3a1.6 1.6 0 0 0 1.6-1.25L21.5 7H6"/></svg>
+      <span class="cart-btn__n" data-cart-count hidden>0</span></button>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6.5h17"/><path d="M3.5 12h17"/><path d="M3.5 17.5h17"/></svg></button>
+  </div>
+</header>
+<div class="drawer" id="drawer">
+  <div class="drawer__top">
+    <a class="brand" href="index.html"><img src="assets/img/brand/logo.webp" alt="" width="44" height="44">
+      <span><span class="brand__name">MOSAIC</span><span class="brand__sub">Lebanese Restaurant</span></span></a>
+    <button class="nav-toggle" type="button" data-drawer-close aria-label="Close menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></button>
+  </div>
+  <nav aria-label="Mobile"><a href="menu.html">Menu</a><a href="story.html">Our Story</a><a href="catering.html">Catering</a><a href="awards.html">Awards</a><a href="contact.html">Contact</a></nav>
+  <div class="drawer__cta">
+    <a class="btn btn--primary" href="contact.html#book">Book a Table</a>
+    <a class="btn btn--ghost" href="menu.html">Order Online</a>
+  </div>
+</div>
+<main id="main">
+<section class="banner">
+  <img class="banner__bg" src="assets/img/catering/station.webp" alt="" loading="eager">
+  <div class="banner__scrim"></div>
+  <div class="wrap"><span class="eyebrow">Mosaic Catering</span><h1>Your table, wherever<br>you are putting it.</h1>
+    <p class="lede" style="max-width:640px;">Corporate events, weddings, friends at home, or an unforgettable night with the people you like most.</p></div>
+</section>
+<section class="band"><div class="wrap">
+  <div class="grid grid--2" style="align-items:start;gap:clamp(30px,5vw,80px);">
+    <div class="rv" style="display:flex;flex-direction:column;gap:22px;">
+      <span class="eyebrow">How it works</span>
+      <h2 style="font-size:clamp(26px,4vw,46px);">First-class Lebanese,<br>on your terms.</h2>
+      <p class="lede">Our range caters for all cravings &mdash; from those looking for home-made food to
+        international connoisseurs. Personalised service, with emphasis on taste, style and flexibility.</p>
+      <div style="display:flex;flex-direction:column;">
+        <div style="display:flex;gap:20px;padding:20px 0;border-bottom:1px solid var(--hair-2);">
+          <span class="num" style="font-family:var(--display);font-size:14px;color:var(--gold);padding-top:4px;">01</span>
+          <div style="display:flex;flex-direction:column;gap:5px;">
+            <span class="disp" style="font-size:19px;">Tell us the shape of the day</span>
+            <span style="font-size:14px;color:var(--muted);">Guest count, timing, venue, and anything the room needs to avoid.</span></div></div><div style="display:flex;gap:20px;padding:20px 0;border-bottom:1px solid var(--hair-2);">
+          <span class="num" style="font-family:var(--display);font-size:14px;color:var(--gold);padding-top:4px;">02</span>
+          <div style="display:flex;flex-direction:column;gap:5px;">
+            <span class="disp" style="font-size:19px;">We build and cost a menu</span>
+            <span style="font-size:14px;color:var(--muted);">Sent within two working days, priced per head, no surprises.</span></div></div><div style="display:flex;gap:20px;padding:20px 0;border-bottom:1px solid var(--hair-2);">
+          <span class="num" style="font-family:var(--display);font-size:14px;color:var(--gold);padding-top:4px;">03</span>
+          <div style="display:flex;flex-direction:column;gap:5px;">
+            <span class="disp" style="font-size:19px;">Taste it</span>
+            <span style="font-size:14px;color:var(--muted);">For weddings and large events, before anything is confirmed.</span></div></div><div style="display:flex;gap:20px;padding:20px 0;border-bottom:1px solid var(--hair-2);">
+          <span class="num" style="font-family:var(--display);font-size:14px;color:var(--gold);padding-top:4px;">04</span>
+          <div style="display:flex;flex-direction:column;gap:5px;">
+            <span class="disp" style="font-size:19px;">We arrive, set, serve and clear</span>
+            <span style="font-size:14px;color:var(--muted);">Our team, our equipment, your evening.</span></div></div>
+      </div>
+    </div>
+    <form class="rv" style="background:var(--paper);border:1px solid var(--hair-2);border-radius:6px;box-shadow:0 3px 18px rgba(20,25,40,.06);padding:clamp(24px,3.4vw,42px);display:flex;flex-direction:column;gap:22px;" onsubmit="return false;">
+      <div style="display:flex;flex-direction:column;gap:7px;">
+        <h2 style="font-size:clamp(24px,3vw,32px);">Plan an event</h2>
+        <p style="font-size:14px;color:var(--muted);">We reply within one working day.</p></div>
+      <div class="formgrid">
+        <label class="fld"><span>Full name</span><input type="text" placeholder="Your name"></label><label class="fld"><span>Phone</span><input type="text" placeholder="+971"></label>
+        <label class="fld fld--wide"><span>Email</span><input type="text" placeholder="you@company.com"></label>
+        <label class="fld"><span>Event date</span><input type="text" placeholder="Select a date"></label><label class="fld"><span>Guests</span><select><option>50–100</option></select></label>
+        <label class="fld"><span>Event type</span><select><option>Corporate reception</option></select></label><label class="fld"><span>Venue</span><input type="text" placeholder="Abu Dhabi"></label>
+      </div>
+      <label class="fld"><span>Anything we should know</span>
+        <textarea placeholder="Allergies, dietary requirements, service style…"></textarea></label>
+      <button class="btn btn--primary" type="submit" style="width:100%;">Send enquiry</button>
+      <div style="display:flex;gap:18px;flex-wrap:wrap;padding-top:16px;border-top:1px solid var(--hair-2);">
+        <a href="tel:0522329182" class="num" style="display:flex;align-items:center;gap:9px;font-size:14px;color:var(--ink);">
+          <span style="color:var(--gold)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.3 3.5h3l1.6 4-2 1.5a12.4 12.4 0 0 0 5.8 5.8l1.5-2 4 1.6v3a1.7 1.7 0 0 1-1.9 1.7A16.5 16.5 0 0 1 4.6 5.4 1.7 1.7 0 0 1 6.3 3.5Z"/></svg></span>052 2329 182</a>
+        <a href="mailto:catering@mosaic-ae.com" style="display:flex;align-items:center;gap:9px;font-size:14px;color:var(--ink);">
+          <span style="color:var(--gold)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.8" y="5" width="18.4" height="14" rx="1.6"/><path d="m3.4 6.2 8.6 6.3 8.6-6.3"/></svg></span>catering@mosaic-ae.com</a>
+      </div>
+    </form>
+  </div>
+</div></section>
+<section class="band band--sand"><div class="wrap">
+  <div class="section-head rv"><h2>Formats we do most often.</h2>
+    <p class="lede" style="max-width:520px;">Every one of these is a starting point, not a package.
+       Menus are written for the event.</p></div>
+  <div class="grid grid--4">
+    <div class="card rv"><div class="card__body">
+      <span class="eyebrow">10&ndash;30 guests</span><span class="disp" style="font-size:22px;">Boardroom lunch</span>
+      <p style="font-size:14px;color:var(--muted);">Mezze platters, hot mains and dessert, delivered and set.</p></div></div><div class="card rv"><div class="card__body">
+      <span class="eyebrow">50&ndash;300 guests</span><span class="disp" style="font-size:22px;">Reception</span>
+      <p style="font-size:14px;color:var(--muted);">Live saj and shawarma stations, canap&eacute; towers, full service team.</p></div></div><div class="card rv"><div class="card__body">
+      <span class="eyebrow">On request</span><span class="disp" style="font-size:22px;">Weddings</span>
+      <p style="font-size:14px;color:var(--muted);">A menu built with you, tasted before you sign anything.</p></div></div><div class="card rv"><div class="card__body">
+      <span class="eyebrow">Ramadan</span><span class="disp" style="font-size:22px;">Iftar &amp; Suhoor</span>
+      <p style="font-size:14px;color:var(--muted);">Hot and cold mezzeh, fresh bread and live cooking stations.</p></div></div>
+  </div>
+</div></section>
+<section class="band band--tight"><div class="wrap"><div class="grid grid--3">
+  <img class="rv" src="assets/img/catering/canapes.webp" alt="Canapé tower" loading="lazy" style="width:100%;">
+  <img class="rv" src="assets/img/catering/station.webp" alt="Buffet station" loading="lazy" style="width:100%;">
+  <img class="rv" src="assets/img/catering/spread.webp" alt="Catering spread" loading="lazy" style="width:100%;">
+</div></div></section>
+
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-col">
+        <a class="brand" href="index.html"><img src="assets/img/brand/logo.webp" alt="" width="44" height="44">
+          <span><span class="brand__name">MOSAIC</span><span class="brand__sub">Lebanese Restaurant</span></span></a>
+        <p style="max-width:280px;margin-top:6px;">A kaleidoscope of Lebanese dishes, served in Abu Dhabi
+           across two addresses.</p>
+        <div class="socials"><a href="https://www.instagram.com/mosaic.restaurant" target="_blank" rel="noopener" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.1"/><circle cx="17.3" cy="6.7" r=".9" fill="currentColor" stroke="none"/></svg></a><a href="https://www.facebook.com/mosaic.lebanese.restaurant" target="_blank" rel="noopener" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.6 8.4V6.9c0-.8.4-1.2 1.3-1.2h1.4V2.9h-2.4c-2.5 0-3.7 1.5-3.7 3.7v1.8H9v2.9h2.2V21h3.4v-9.7h2.4l.4-2.9Z"/></svg></a><a href="https://www.tiktok.com/@mosaic.ae" target="_blank" rel="noopener" aria-label="TikTok"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.2 3h2.6a4.9 4.9 0 0 0 4.2 4.3v2.6a7.5 7.5 0 0 1-4.2-1.4v6.1a5.7 5.7 0 1 1-5.7-5.7c.3 0 .6 0 .9.1v2.7a3 3 0 1 0 2.2 2.9Z"/></svg></a><a href="https://www.youtube.com/@mosaic.restaurant" target="_blank" rel="noopener" aria-label="YouTube"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.6" y="5.4" width="18.8" height="13.2" rx="3.6"/><path d="m10.4 9.4 5 2.6-5 2.6Z"/></svg></a><a href="https://www.linkedin.com/company/mosaic-lebanese-restaurant" target="_blank" rel="noopener" aria-label="LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2.4"/><path d="M7.4 10.4V17"/><circle cx="7.4" cy="7.2" r="1.1" fill="currentColor" stroke="none"/><path d="M11.6 17v-3.7a2.1 2.1 0 0 1 4.2 0V17"/><path d="M11.6 10.4V17"/></svg></a></div>
+      </div>
+    <div class="foot-col">
+      <h4>Al Muroor</h4>
+      <p>Al Sa&rsquo;ada area, Al Rumaithi street<br>Guardian Towers, Abu Dhabi</p>
+      <a href="tel:022340202" class="num">02 234 0202</a>
+    </div>
+    <div class="foot-col">
+      <h4>Al Najda</h4>
+      <p>Mohammed Bin Butti street, facing Al Sultan Bakery<br>Vision Towers, Abu Dhabi</p>
+      <a href="tel:026226122" class="num">02 622 6122</a>
+    </div>
+      <div class="foot-col">
+        <h4>Opening hours</h4>
+        <p class="num">Sat &ndash; Thu &nbsp;8:00 &ndash; 23:30<br>Friday &nbsp;13:30 &ndash; 23:30</p>
+        <a href="mailto:info@mosaic-ae.com">info@mosaic-ae.com</a>
+        <a href="mailto:catering@mosaic-ae.com">catering@mosaic-ae.com</a>
+      </div>
+    </div>
+    <hr class="hair" style="margin:clamp(28px,4vw,44px) 0 0;">
+    <div class="foot-bottom">
+      <span>Mosaic Lebanese Restaurant &middot; Abu Dhabi</span>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;">
+        <a href="#">Mosaic Catering</a><a href="#">La Tartine P&acirc;tisserie</a>
+        <a href="#">Nazira Kitchen</a><a href="#">Salatoush</a><a href="#">Space Bun</a>
+      </div>
+    </div>
+  </div>
+</footer>
+<script src="assets/js/booking-store.js" defer></script>
+<script src="assets/js/cart.js" defer></script>
+<script src="assets/js/site.js" defer></script>
+</body>
+</html>

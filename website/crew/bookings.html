@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bookings — Mosaic Crew</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#141928">
+<link rel="icon" href="../assets/img/brand/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=PT+Sans:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/crew.css">
+</head>
+<body class="crew">
+<div id="crew-shell"></div>
+<main id="crew-main" hidden>
+
+  <div class="crew-title"><div><h1>Bookings</h1>
+    <p id="bk-sub">Tables reserved through the website and by phone.</p></div></div>
+  <div class="bk-tabs" id="bk-tabs"></div>
+  <div id="bk-list"><p class="crew-empty">Loading…</p></div>
+
+</main>
+<script src="../assets/js/vendor/supabase.min.js"></script>
+<script src="../assets/js/crew/config.js"></script>
+<script src="../assets/js/crew/auth.js"></script>
+<script src="../assets/js/crew/shell.js"></script>
+<script src="../assets/js/crew/orders.js"></script><script>
+window.pageInit = async function(c){
+  await CrewOrders.statusDefs();
+  var may = Crew.can('bookings.manage');
+  var filter='today', rows=[];
+  var LABEL={PENDING:'Pending',CONFIRMED:'Confirmed',SEATED:'Seated',
+             COMPLETED:'Done',NO_SHOW:'No show',CANCELLED:'Cancelled'};
+
+  function todayISO(){ var d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset());
+    return d.toISOString().slice(0,10); }
+
+  async function load(){
+    var q=Crew.sb.from('bookings').select('*')
+      .order('booking_date').order('booking_time');
+    if(filter==='today') q=q.eq('booking_date',todayISO());
+    else if(filter==='upcoming') q=q.gt('booking_date',todayISO());
+    else if(filter==='pending') q=q.eq('status','PENDING');
+    var r=await q;
+    if(r.error){ document.getElementById('bk-list').innerHTML=
+      '<p class="crew-empty">'+r.error.message+'</p>'; return; }
+    rows=r.data||[];
+  }
+
+  function tabs(){
+    document.getElementById('bk-tabs').innerHTML=
+      [['today','Today'],['upcoming','Upcoming'],['pending','Awaiting confirmation'],['all','All']]
+      .map(function(t){ return '<button class="bk-tab'+(filter===t[0]?' is-on':'')+
+        '" data-f="'+t[0]+'">'+t[1]+'</button>'; }).join('');
+    document.querySelectorAll('[data-f]').forEach(function(b){
+      b.onclick=async function(){ filter=b.dataset.f; await load(); draw(); };});
+  }
+
+  function draw(){
+    tabs();
+    document.getElementById('bk-sub').textContent = rows.length
+      ? rows.length+' booking'+(rows.length===1?'':'s')
+      : 'Nothing in this view';
+    if(!rows.length){ document.getElementById('bk-list').innerHTML=
+      '<p class="crew-empty">No bookings here.</p>'; return; }
+
+    // split by branch, same as orders — two rooms must never be conflated
+    var ids=[]; rows.forEach(function(b){ if(ids.indexOf(b.restaurant_id)===-1) ids.push(b.restaurant_id); });
+    ids.sort(function(a,b){return CrewOrders.restName(a).localeCompare(CrewOrders.restName(b));});
+    document.getElementById('bk-list').innerHTML = ids.map(function(rid){
+      var mine=rows.filter(function(b){return b.restaurant_id===rid;});
+      return '<section class="obranch"><header class="obranch__h">'+
+        '<h2>'+CrewOrders.esc(CrewOrders.restName(rid))+'</h2><span>'+mine.length+'</span></header>'+
+        '<div class="bkgrid">'+mine.map(card).join('')+'</div></section>'; }).join('');
+
+    document.querySelectorAll('[data-set]').forEach(function(b){
+      b.onclick=async function(){
+        var id=b.dataset.set, to=b.dataset.to;
+        if(to==='CANCELLED' && !confirm('Cancel this booking?')) return;
+        var u=await Crew.sb.from('bookings').update({status:to, handled_by:c.user.id}).eq('id',id);
+        if(u.error) return alert(u.error.message);
+        await load(); draw(); };});
+  }
+
+  function card(b){
+    var t=b.booking_time.slice(0,5);
+    var acts='';
+    if(may){
+      if(b.status==='PENDING')   acts='<button class="prim" data-set="'+b.id+'" data-to="CONFIRMED">Confirm</button>'+
+                                      '<button data-set="'+b.id+'" data-to="CANCELLED">Cancel</button>';
+      else if(b.status==='CONFIRMED') acts='<button class="prim" data-set="'+b.id+'" data-to="SEATED">Seat</button>'+
+                                      '<button data-set="'+b.id+'" data-to="NO_SHOW">No show</button>';
+      else if(b.status==='SEATED') acts='<button class="prim" data-set="'+b.id+'" data-to="COMPLETED">Complete</button>';
+    }
+    return '<article class="bkcard" data-s="'+b.status+'">'+
+      '<div class="bkcard__h"><span class="bkcard__w">'+t+'</span>'+
+        '<span class="ostat" style="background:'+
+          ({PENDING:'#B4761B',CONFIRMED:'#2F6F4F',SEATED:'#39497C',COMPLETED:'#5A6070',
+            NO_SHOW:'#B3261E',CANCELLED:'#B3261E'})[b.status]+'">'+LABEL[b.status]+'</span></div>'+
+      '<dl><dt>Guest</dt><dd>'+CrewOrders.esc(b.guest_name)+'</dd>'+
+        '<dt>Party</dt><dd>'+b.party_size+' &middot; '+CrewOrders.esc(b.booking_type)+'</dd>'+
+        '<dt>Phone</dt><dd><a href="tel:'+CrewOrders.esc(b.guest_phone)+'">'+CrewOrders.esc(b.guest_phone)+'</a></dd>'+
+        '<dt>Date</dt><dd>'+new Date(b.booking_date+'T12:00:00')
+          .toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+'</dd></dl>'+
+      (b.notes?'<div class="ocard__note">'+CrewOrders.esc(b.notes)+'</div>':'')+
+      '<span class="bkcard__r">Ref '+CrewOrders.esc(b.reference)+'</span>'+
+      (acts?'<div class="bkcard__acts">'+acts+'</div>':'')+
+    '</article>';
+  }
+
+  await load(); draw();
+  Crew.sb.channel('crew-bookings')
+    .on('postgres_changes',{event:'*',schema:'public',table:'bookings'},
+        async function(){ await load(); draw(); }).subscribe();
+};
+</script><script>(async function(){var c = await Crew.requirePage('bookings');if(!c) return;CrewShell.render(c);if (window.CrewNotify) CrewNotify.mount(c);document.getElementById("crew-main").hidden = false;if (window.pageInit) window.pageInit(c);})();</script></body>
+</html>

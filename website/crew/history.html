@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>History — Mosaic Crew</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#141928">
+<link rel="icon" href="../assets/img/brand/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=PT+Sans:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/crew.css">
+</head>
+<body class="crew">
+<div id="crew-shell"></div>
+<main id="crew-main" hidden>
+
+  <div class="crew-title"><div><h1>History</h1><p>Every state change, immutable.</p></div></div>
+  <div class="panel-c" style="padding:14px;"><div id="h-list">Loading…</div></div>
+
+</main>
+<script src="../assets/js/vendor/supabase.min.js"></script>
+<script src="../assets/js/crew/config.js"></script>
+<script src="../assets/js/crew/auth.js"></script>
+<script src="../assets/js/crew/shell.js"></script>
+<script src="../assets/js/crew/orders.js"></script><script>
+window.pageInit = async function(c){
+  var defs=await CrewOrders.statusDefs();
+  var r=await Crew.sb.from('orders').select('*, order_items(*)')
+    .order('created_at',{ascending:false}).limit(40);
+  var ids=(r.data||[]).map(function(o){return o.id;});
+  var ev = ids.length ? await Crew.sb.from('order_events').select('*')
+    .in('order_id',ids).order('created_at') : {data:[]};
+  var byOrder={}; (ev.data||[]).forEach(function(e){(byOrder[e.order_id]=byOrder[e.order_id]||[]).push(e);});
+  document.getElementById('h-list').innerHTML=(r.data||[]).length
+    ? (r.data).map(function(o){
+      var evs=byOrder[o.id]||[];
+      return '<details class="hrow"><summary><b>#'+o.number+'</b> '+
+        (o.table_label?CrewOrders.esc(o.table_label)+' · ':'')+
+        '<span class="ostat" style="background:'+(defs[o.status]||{}).colour+'">'+
+        (defs[o.status]||{}).label+'</span> <i>'+new Date(o.created_at)
+          .toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+
+        '</i></summary><ol class="htl">'+
+        evs.map(function(e){
+          return '<li><time>'+new Date(e.created_at).toLocaleTimeString('en-GB',
+            {hour:'2-digit',minute:'2-digit'})+'</time> '+
+            (e.action==='status_change'
+              ? (e.from_status||'—')+' &rarr; <b>'+e.to_status+'</b>'
+              : e.action==='undo' ? '<b>undone</b> back to '+e.to_status
+              : e.action==='priority_change' ? 'priority '+(e.metadata||{}).from+' &rarr; '+(e.metadata||{}).to
+              : e.action)+
+            (e.actor_role?' <i>by '+e.actor_role+'</i>':'')+'</li>'; }).join('')+
+        '</ol></details>'; }).join('')
+    : '<p class="crew-empty">No orders yet.</p>';
+};
+</script><script>(async function(){var c = await Crew.requirePage('history');if(!c) return;CrewShell.render(c);if (window.CrewNotify) CrewNotify.mount(c);document.getElementById("crew-main").hidden = false;if (window.pageInit) window.pageInit(c);})();</script></body>
+</html>

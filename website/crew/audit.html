@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Audit log — Mosaic Crew</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#141928">
+<link rel="icon" href="../assets/img/brand/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=PT+Sans:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/crew.css">
+</head>
+<body class="crew">
+<div id="crew-shell"></div>
+<main id="crew-main" hidden>
+
+  <div class="crew-title"><div><h1>Audit log</h1>
+    <p>Append-only. Update and delete are revoked at the database level &mdash;
+       nobody can rewrite this, including a system owner.</p></div></div>
+  <div class="panel-c tscroll" style="padding:6px 14px 14px;"><div id="a-list">Loading…</div></div>
+
+</main>
+<script src="../assets/js/vendor/supabase.min.js"></script>
+<script src="../assets/js/crew/config.js"></script>
+<script src="../assets/js/crew/auth.js"></script>
+<script src="../assets/js/crew/shell.js"></script>
+<script>
+window.pageInit = async function(c){
+  var r=await Crew.sb.from('audit_logs').select('*').order('created_at',{ascending:false}).limit(200);
+  if(r.error){ document.getElementById('a-list').innerHTML='<p class="crew-empty">'+r.error.message+'</p>'; return; }
+  document.getElementById('a-list').innerHTML=(r.data||[]).length
+    ? '<table class="rtable"><thead><tr><th>When</th><th>Who</th><th>Action</th><th>Target</th><th>Detail</th></tr></thead><tbody>'+
+      r.data.map(function(a){
+        return '<tr><td>'+new Date(a.created_at).toLocaleString('en-GB',
+            {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+'</td>'+
+          '<td>'+(a.actor_email||'system')+'<br><small>'+(a.actor_role||'')+'</small></td>'+
+          '<td><code>'+a.action+'</code></td><td>'+a.resource+'</td>'+
+          '<td><small>'+(a.after?JSON.stringify(a.after).slice(0,90):'')+'</small></td></tr>'; }).join('')+
+      '</tbody></table>'
+    : '<p class="crew-empty">Nothing logged yet.</p>';
+};
+</script><script>(async function(){var c = await Crew.requirePage('audit');if(!c) return;CrewShell.render(c);if (window.CrewNotify) CrewNotify.mount(c);document.getElementById("crew-main").hidden = false;if (window.pageInit) window.pageInit(c);})();</script></body>
+</html>

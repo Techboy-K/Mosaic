@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crew sign in — Mosaic</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#141928">
+<link rel="icon" href="../assets/img/brand/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=PT+Sans:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/crew.css">
+</head>
+<body class="crew">
+
+<div class="crew-login">
+  <form class="crew-login__card" id="login-form" autocomplete="on">
+    <div class="crew-login__logo">
+      <img src="../assets/img/brand/logo.webp" alt="">
+      <b>MOSAIC</b><span>Crew portal</span>
+    </div>
+    <div class="crew-err" id="login-err" hidden></div>
+    <label class="fld"><span>Email</span>
+      <input id="login-email" type="email" autocomplete="username" required
+             placeholder="you@gmail.com" inputmode="email"></label>
+    <label class="fld"><span>Password</span>
+      <input id="login-pass" type="password" autocomplete="current-password" required
+             placeholder="••••••••••"></label>
+    <button class="btn btn--wine" type="submit" id="login-go" style="width:100%">Sign in</button>
+    <button class="btn btn--ghost" type="button" id="login-reset" style="width:100%">
+      Forgot password</button>
+    <p class="crew-note">Staff access only. Every action in this portal is recorded
+       against your account.</p>
+  </form>
+</div>
+<script src="../assets/js/vendor/supabase.min.js"></script>
+<script src="../assets/js/crew/config.js"></script>
+<script src="../assets/js/crew/auth.js"></script>
+<script src="../assets/js/crew/shell.js"></script>
+<script>
+(function(){
+  var f=document.getElementById('login-form'), err=document.getElementById('login-err'),
+      go=document.getElementById('login-go');
+  function fail(m){ err.textContent=m; err.hidden=false; }
+
+  Crew.load().then(function(c){ if(c) location.replace(Crew.homeFor(c)); });
+
+  f.addEventListener('submit', async function(e){
+    e.preventDefault(); err.hidden=true;
+    go.disabled=true; go.textContent='Signing in…';
+    var r = await Crew.signIn(document.getElementById('login-email').value.trim(),
+                              document.getElementById('login-pass').value);
+    if(!r.ok){
+      go.disabled=false; go.textContent='Sign in';
+      /* deliberately vague: never confirm whether an address exists */
+      fail(/Invalid/i.test(r.message) ? 'That email and password do not match.' : r.message);
+      return;
+    }
+    var next=new URLSearchParams(location.search).get('next');
+    location.replace(next && /^[a-z0-9-]+\.html$/.test(next) ? next : Crew.homeFor(r.ctx));
+  });
+
+  document.getElementById('login-reset').addEventListener('click', async function(){
+    var em=document.getElementById('login-email').value.trim();
+    if(!em){ fail('Enter your email first, then press Forgot password.'); return; }
+    await Crew.sb.auth.resetPasswordForEmail(em,{redirectTo:location.origin+'/crew/reset.html'});
+    err.textContent='If that address has an account, a reset link is on its way.';
+    err.hidden=false;
+  });
+})();
+</script></body>
+</html>

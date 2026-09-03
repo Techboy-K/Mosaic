@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monitor — Mosaic Crew</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#141928">
+<link rel="icon" href="../assets/img/brand/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=PT+Sans:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/crew.css">
+</head>
+<body class="crew">
+<div id="crew-shell"></div>
+<main id="crew-main" hidden>
+
+  <div class="crew-title"><div><h1 id="mo-title">Command centre</h1>
+    <p id="mo-sub">Pick a branch. Overrides are logged against you.</p></div>
+    <button class="btn btn--ghost btn--sm" id="mo-back" hidden>All branches</button></div>
+  <div id="mo-sound"></div>
+  <div id="mo-branches" class="mo-branches"></div>
+  <div id="mo-board" hidden></div>
+  <div id="mo-drawer"></div>
+
+</main>
+<script src="../assets/js/vendor/supabase.min.js"></script>
+<script src="../assets/js/crew/config.js"></script>
+<script src="../assets/js/crew/auth.js"></script>
+<script src="../assets/js/crew/shell.js"></script>
+<script src="../assets/js/crew/orders.js"></script><script>
+window.pageInit = async function(c){
+  var defs = await CrewOrders.statusDefs();
+  document.getElementById('mo-sound').innerHTML = CrewOrders.soundBar();
+  /* the state machine is defined in Postgres; mirror it here only to grey out
+     illegal drop targets. transition_order() still has the final say. */
+  var ALLOWED={};
+  (await Crew.sb.from('order_transitions').select('from_status,to_status')).data
+    ?.forEach(function(t){ (ALLOWED[t.from_status]=ALLOWED[t.from_status]||[]).push(t.to_status); });
+  var LIVE=['SUBMITTED','SENT_TO_KITCHEN','IN_PREPARATION','READY','SERVED','NEEDS_ATTENTION'];
+  var COLS=['SUBMITTED','SENT_TO_KITCHEN','IN_PREPARATION','READY','SERVED','NEEDS_ATTENTION'];
+  var branch=null, rows=[];
+
+  async function pull(){
+    rows = await CrewOrders.fetchOrders(LIVE.concat(['DRAFT']));
+  }
+
+  function branchView(){
+    var ids=[]; rows.forEach(function(o){ if(ids.indexOf(o.restaurant_id)===-1) ids.push(o.restaurant_id); });
+    (c.restaurants||[]).forEach(function(r){ if(ids.indexOf(r.id)===-1) ids.push(r.id); });
+    ids.sort(function(a,b){return CrewOrders.restName(a).localeCompare(CrewOrders.restName(b));});
+    document.getElementById('mo-branches').innerHTML = ids.map(function(rid){
+      var mine=rows.filter(function(o){return o.restaurant_id===rid;});
+      var urgent=mine.filter(function(o){return o.priority==='URGENT';}).length;
+      var late=mine.filter(function(o){return (Date.now()-new Date(o.created_at))/60000>25;}).length;
+      return '<button class="mo-branch" data-b="'+rid+'">'+
+        '<h2>'+CrewOrders.esc(CrewOrders.restName(rid))+'</h2>'+
+        '<b>'+mine.length+'</b><span>live orders</span>'+
+        '<div class="mo-branch__f">'+
+          COLS.slice(0,4).map(function(k){
+            var n=mine.filter(function(o){return o.status===k;}).length;
+            return '<i><em>'+n+'</em>'+defs[k].label+'</i>'; }).join('')+
+        '</div>'+
+        (urgent?'<span class="mo-flag mo-flag--u">'+urgent+' urgent</span>':'')+
+        (late?'<span class="mo-flag mo-flag--l">'+late+' over 25 min</span>':'')+
+      '</button>'; }).join('');
+    document.querySelectorAll('[data-b]').forEach(function(b){
+      b.onclick=function(){ branch=b.dataset.b; show(); };});
+  }
+
+  var mine=[];
+  function boardView(){
+    mine=rows.filter(function(o){return o.restaurant_id===branch;});
+    document.getElementById('mo-board').innerHTML =
+      '<div class="kb">'+COLS.map(function(k){
+        var col=mine.filter(function(o){return o.status===k;});
+        return '<section class="kbcol" data-k="'+k+'"><header style="--c:'+defs[k].colour+'">'+
+          '<b>'+defs[k].label+'</b><i>'+col.length+'</i></header><div class="kbcol__b">'+
+          '<span class="kbdrop">Not a legal move</span>'+
+          (col.length? col.map(function(o){
+            return CrewOrders.card(o,null,{hideStatus:true,hideBranch:true}); }).join('')
+            : '<p class="kbcol__e">&mdash;</p>')+
+        '</div></section>'; }).join('')+'</div>';
+    var board=document.querySelector('#mo-board .kb');
+    var dragId=null;
+
+    document.querySelectorAll('#mo-board .ocard').forEach(function(el){
+      var o=mine.filter(function(x){return x.id===el.dataset.id;})[0];
+      el.onclick=function(e){ if(!el.classList.contains('is-drag')) detail(el.dataset.id); };
+      if(!Crew.can('orders.change_status')) return;
+      el.draggable=true;
+      el.addEventListener('dragstart',function(e){
+        dragId=el.dataset.id; el.classList.add('is-drag');
+        e.dataTransfer.effectAllowed='move';
+        try{ e.dataTransfer.setData('text/plain', dragId); }catch(_){}
+        board.classList.add('is-dragging');
+        /* mark the columns this order may legally reach, from the DB's own
+           transition table — the UI never invents a legal move */
+        document.querySelectorAll('.kbcol').forEach(function(col){
+          var ok = ALLOWED[o.status] && ALLOWED[o.status].indexOf(col.dataset.k)>-1;
+          col.classList.toggle('is-nodrop', !ok || col.dataset.k===o.status);
+        });
+      });
+      el.addEventListener('dragend',function(){
+        el.classList.remove('is-drag'); dragId=null;
+        board.classList.remove('is-dragging');
+        document.querySelectorAll('.kbcol').forEach(function(c){
+          c.classList.remove('is-over','is-nodrop'); });
+      });
+    });
+
+    document.querySelectorAll('.kbcol').forEach(function(col){
+      col.addEventListener('dragover',function(e){
+        if(col.classList.contains('is-nodrop')) return;
+        e.preventDefault(); col.classList.add('is-over'); });
+      col.addEventListener('dragleave',function(){ col.classList.remove('is-over'); });
+      col.addEventListener('drop',async function(e){
+        e.preventDefault(); col.classList.remove('is-over');
+        if(!dragId || col.classList.contains('is-nodrop')) return;
+        var o=mine.filter(function(x){return x.id===dragId;})[0];
+        var to=col.dataset.k;
+        if(!o || o.status===to) return;
+        var r=await CrewOrders.move(o.id,to,{via:'kanban-drag'});
+        if(r && r.error){ alert(r.error.message||r.error); }
+        await pull(); show();
+      });
+    });
+  }
+
+  function show(){
+    var on=!!branch;
+    document.getElementById('mo-branches').hidden=on;
+    document.getElementById('mo-board').hidden=!on;
+    document.getElementById('mo-back').hidden=!on;
+    document.getElementById('mo-title').textContent = on? CrewOrders.restName(branch) : 'Command centre';
+    document.getElementById('mo-sub').textContent = on
+      ? 'Tap any order to open it'
+      : 'Pick a branch. Overrides are logged against you.';
+    on? boardView() : branchView();
+  }
+
+  async function detail(id){
+    var o=rows.filter(function(x){return x.id===id;})[0]; if(!o) return;
+    var ev=await Crew.sb.from('order_events').select('*').eq('order_id',id).order('created_at');
+    var host=document.getElementById('mo-drawer');
+    var legal=Object.keys(defs).filter(function(k){return k!==o.status;});
+    host.innerHTML='<div class="udrawer__veil" data-x></div><aside class="udrawer__p">'+
+      '<header><h2>Order #'+o.number+'</h2><button type="button" data-x aria-label="Close">&times;</button></header>'+
+      '<div class="udrawer__b">'+
+        '<div class="odt"><span class="ostat" style="background:'+defs[o.status].colour+'">'+
+          defs[o.status].label+'</span>'+
+          (o.priority!=='NORMAL'?'<span class="opri opri--'+o.priority.toLowerCase()+'">'+
+            (o.priority==='URGENT'?'Urgent':'High')+'</span>':'')+'</div>'+
+        '<dl class="ukv">'+
+          '<dt>Branch</dt><dd>'+CrewOrders.esc(CrewOrders.restName(o.restaurant_id))+'</dd>'+
+          '<dt>Table</dt><dd>'+CrewOrders.esc(o.table_label||'—')+'</dd>'+
+          '<dt>Opened</dt><dd>'+CrewOrders.age(o.created_at)+' ago</dd>'+
+        '</dl>'+
+        (o.is_quick_note
+          ? '<div class="ocard__note"><b>Quick note</b><br>'+
+             CrewOrders.esc(o.quick_note_text||'').replace(/\n/g,'<br>')+'</div>'
+          : '<ul class="ocard__items">'+(o.order_items||[]).map(function(i){
+              return '<li><b>'+i.qty+'&times;</b><span>'+CrewOrders.esc(i.name)+
+                (i.notes?'<i>'+CrewOrders.esc(i.notes)+'</i>':'')+'</span></li>';}).join('')+'</ul>')+
+        (o.notes?'<div class="ocard__note">'+CrewOrders.esc(o.notes)+'</div>':'')+
+        '<hr class="hair">'+
+        '<label class="fld"><span>Move to</span><select id="od-to">'+
+          '<option value="">Choose a state…</option>'+
+          legal.map(function(k){return '<option value="'+k+'">'+defs[k].label+'</option>';}).join('')+
+        '</select></label>'+
+        '<label class="fld"><span>Priority</span><select id="od-pri">'+
+          ['NORMAL','HIGH','URGENT'].map(function(p){
+            return '<option value="'+p+'"'+(p===o.priority?' selected':'')+'>'+p+'</option>';}).join('')+
+        '</select></label>'+
+        '<h3 style="font-size:14px;margin-top:6px">History</h3>'+
+        '<ol class="htl">'+(ev.data||[]).map(function(e){
+          return '<li><time>'+new Date(e.created_at).toLocaleTimeString('en-GB',
+            {hour:'2-digit',minute:'2-digit'})+'</time> '+
+            (e.action==='status_change'
+              ? (defs[e.from_status]||{}).label+' &rarr; <b>'+(defs[e.to_status]||{}).label+'</b>'
+              : e.action==='undo' ? '<b>undone</b>'
+              : e.action==='priority_change' ? 'priority '+(e.metadata||{}).from+' &rarr; '+(e.metadata||{}).to
+              : e.action)+(e.actor_role?' <i>by '+e.actor_role+'</i>':'')+'</li>';}).join('')+'</ol>'+
+      '</div></aside>';
+    host.classList.add('is-open');
+    host.querySelectorAll('[data-x]').forEach(function(b){b.onclick=function(){host.classList.remove('is-open');};});
+    document.getElementById('od-to').onchange=async function(){
+      if(!this.value) return;
+      if(!confirm('Override order #'+o.number+' to '+defs[this.value].label+'? This is logged.')){
+        this.value=''; return; }
+      await CrewOrders.move(o.id,this.value,{override:true});
+      host.classList.remove('is-open'); await pull(); show(); };
+    document.getElementById('od-pri').onchange=async function(){
+      var r=await Crew.sb.rpc('set_order_priority',{p_order:o.id,p_priority:this.value});
+      if(r.error) return alert(r.error.message);
+      host.classList.remove('is-open'); await pull(); show(); };
+  }
+
+  document.getElementById('mo-back').onclick=function(){ branch=null; show(); };
+  async function refresh(){ await pull(); show(); }
+  await refresh();
+  CrewOrders.watch(refresh);
+  document.addEventListener('orders:changed',refresh);
+  document.addEventListener('crew:restaurant',refresh);
+  setInterval(refresh,30000);
+};
+</script><script>(async function(){var c = await Crew.requirePage('monitor');if(!c) return;CrewShell.render(c);if (window.CrewNotify) CrewNotify.mount(c);document.getElementById("crew-main").hidden = false;if (window.pageInit) window.pageInit(c);})();</script></body>
+</html>

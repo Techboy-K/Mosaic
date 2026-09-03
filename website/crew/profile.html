@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My profile — Mosaic Crew</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#141928">
+<link rel="icon" href="../assets/img/brand/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=PT+Sans:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/crew.css">
+</head>
+<body class="crew">
+<div id="crew-shell"></div>
+<main id="crew-main" hidden>
+
+  <div class="crew-title"><div><h1>My profile</h1></div></div>
+  <div class="panel-c" style="padding:20px;max-width:520px;display:flex;flex-direction:column;gap:14px;">
+    <div class="imgpick">
+      <div class="imgpick__prev imgpick__prev--round" id="pf-prev"><span>No photo</span></div>
+      <div class="imgpick__act">
+        <label class="btn btn--ghost btn--sm">Change photo
+          <input type="file" id="pf-img" accept="image/jpeg,image/png,image/webp" hidden></label>
+        <p id="pf-imgmsg" class="crew-note" style="text-align:left;margin:0"></p>
+      </div>
+    </div>
+    <dl class="ukv" id="pf-kv"></dl><hr class="hair">
+    <label class="fld"><span>Full name</span><input id="pf-name"></label>
+    <button class="btn btn--wine btn--sm" id="pf-save" style="align-self:flex-start">Save</button>
+    <hr class="hair">
+    <h2 style="font-size:16px">Change password</h2>
+    <label class="fld"><span>New password</span><input id="pf-pw" type="password" placeholder="At least 10 characters"></label>
+    <button class="btn btn--ghost btn--sm" id="pf-pwsave" style="align-self:flex-start">Update password</button>
+  </div>
+
+</main>
+<script src="../assets/js/vendor/supabase.min.js"></script>
+<script src="../assets/js/crew/config.js"></script>
+<script src="../assets/js/crew/auth.js"></script>
+<script src="../assets/js/crew/shell.js"></script>
+<script src="../assets/js/crew/upload.js"></script>
+<script>
+window.pageInit = function(c){
+  var prev=document.getElementById('pf-prev');
+  if(c.profile.avatar_path) prev.innerHTML='<img src="'+c.profile.avatar_path+'" alt="">';
+  var fi=document.getElementById('pf-img');
+  fi.onchange=async function(){
+    var msg=document.getElementById('pf-imgmsg'); msg.textContent='Uploading…';
+    var r=await CrewUpload.image(fi.files[0],'avatars',{prefix:c.user.id,maxPx:512});
+    if(r.error){ msg.textContent=r.error; msg.style.color='var(--bad)'; return; }
+    var up=await Crew.sb.from('profiles').update({avatar_path:r.url}).eq('id',c.user.id);
+    if(up.error){ msg.textContent=up.error.message; msg.style.color='var(--bad)'; return; }
+    prev.innerHTML='<img src="'+r.url+'" alt="">';
+    msg.textContent='Saved'; msg.style.color='var(--ok)';
+  };
+  document.getElementById('pf-kv').innerHTML =
+    '<dt>Email</dt><dd>'+c.profile.email+'</dd>'+
+    '<dt>Role</dt><dd>'+c.roles.map(function(r){return r.name;}).join(', ')+'</dd>'+
+    '<dt>Branches</dt><dd>'+(c.restaurants.map(function(r){return r.name;}).join(', ')||'none')+'</dd>'+
+    '<dt>Last login</dt><dd>'+(c.profile.last_login_at? new Date(c.profile.last_login_at)
+      .toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—')+'</dd>';
+  document.getElementById('pf-name').value=c.profile.full_name||'';
+  document.getElementById('pf-save').onclick=async function(){
+    var r=await Crew.sb.from('profiles').update({full_name:document.getElementById('pf-name').value})
+      .eq('id',c.user.id);
+    this.textContent=r.error?'Failed':'Saved'; };
+  document.getElementById('pf-pwsave').onclick=async function(){
+    var pw=document.getElementById('pf-pw').value;
+    if(pw.length<10) return alert('At least 10 characters.');
+    var r=await Crew.sb.auth.updateUser({password:pw});
+    alert(r.error?r.error.message:'Password updated.'); };
+};
+</script><script>(async function(){var c = await Crew.requirePage(null);if(!c) return;CrewShell.render(c);if (window.CrewNotify) CrewNotify.mount(c);document.getElementById("crew-main").hidden = false;if (window.pageInit) window.pageInit(c);})();</script></body>
+</html>

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>No access — Mosaic Crew</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#141928">
+<link rel="icon" href="../assets/img/brand/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=PT+Sans:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/crew.css">
+</head>
+<body class="crew">
+
+<div id="crew-shell"></div>
+<main><div class="crew-deny"><div>
+  <h1 style="font-size:26px;">You don&rsquo;t have access to that page</h1>
+  <p style="color:var(--muted);font-size:14px;">Your role doesn&rsquo;t include it.
+     If you think that&rsquo;s wrong, ask a supervisor or an admin.</p>
+  <a class="btn btn--wine" href="index.html" id="deny-home">Back to your pages</a>
+</div></div></main>
+<script src="../assets/js/vendor/supabase.min.js"></script>
+<script src="../assets/js/crew/config.js"></script>
+<script src="../assets/js/crew/auth.js"></script>
+<script src="../assets/js/crew/shell.js"></script>
+<script>(async function(){
+  var c=await Crew.load();
+  if(c){ CrewShell.render(c); document.getElementById('deny-home').href=Crew.homeFor(c); }
+})();</script></body>
+</html>

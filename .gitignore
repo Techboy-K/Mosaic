@@ -1,0 +1,38 @@
+# ─── secrets: never, under any circumstance ───────────────────────────
+.secrets/
+*.env
+.env*
+!*.env.example
+*credentials*
+*-credentials.txt
+test-accounts.txt
+service-role*
+*.pem
+*.key
+
+# ─── large source media (not needed to deploy) ────────────────────────
+# The landing film ships encoded at website/assets/video/landing.mp4 (9 MB).
+# This is the 81 MB master.
+Mosaic landing.mp4
+Media for video/
+design/
+3d-source/
+
+# ─── research package: scraped third-party media, internal working notes ──
+# Kept local. The repo may go public; these are mosaicrestaurant.com's photos.
+mosaic-restaurant-research/
+signature-dish/
+menu-highlights-3d/
+
+# ─── tooling / generated ──────────────────────────────────────────────
+graphify-out/
+graphify-src/
+.claude/
+.cursor/
+.gemini/
+.agent/
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+*.bak

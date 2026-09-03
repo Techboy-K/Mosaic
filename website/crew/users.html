@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Staff — Mosaic Crew</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#141928">
+<link rel="icon" href="../assets/img/brand/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=PT+Sans:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/crew.css">
+</head>
+<body class="crew">
+<div id="crew-shell"></div>
+<main id="crew-main" hidden>
+
+  <div class="crew-title">
+    <div><h1 id="u-title">Staff</h1><p>Pick a branch to see who works there.
+      Drag a card to change someone&rsquo;s role &mdash; the server checks your authority regardless.</p></div>
+    <div style="display:flex;gap:9px;">
+      <button class="btn btn--ghost btn--sm" type="button" id="u-back" hidden>All branches</button>
+      <button class="btn btn--wine btn--sm" type="button" id="u-new">Add staff</button>
+    </div>
+  </div>
+  <div class="bk-tabs" id="u-branchtabs"></div>
+  <div id="u-board"></div>
+  <div id="u-drawer"></div>
+  <div id="u-wizard"></div>
+
+</main>
+<script src="../assets/js/vendor/supabase.min.js"></script>
+<script src="../assets/js/crew/config.js"></script>
+<script src="../assets/js/crew/auth.js"></script>
+<script src="../assets/js/crew/shell.js"></script>
+<script src="../assets/js/crew/upload.js"></script>
+<script src="../assets/js/crew/users.js"></script>
+<script>
+window.pageInit = async function(c){
+  await CrewUsers.load(); CrewUsers.render();
+  var btn = document.getElementById('u-new');
+  if (!Crew.can('users.create')) { btn.hidden = true; return; }
+  btn.onclick = function(){ openWizard(c); };
+
+  function openWizard(ctx){
+    var S = CrewUsers.state;
+    var assignable = S.roles.filter(CrewUsers.mayAssign);
+    if (!assignable.length){ alert('There are no roles below your authority to assign.'); return; }
+    var step = 0, data = { mode:'invite', restaurant_ids: [], role_id: assignable[0].id };
+    var STEPS = ['Person','Role','Branches','Access','Sign-in','Review'];
+    var host = document.getElementById('u-wizard');
+
+    function pw(){ var a='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
+      return Array.from(crypto.getRandomValues(new Uint32Array(16)))
+        .map(function(n){return a[n%a.length];}).join(''); }
+
+    function body(){
+      var role = S.roles.filter(function(r){return r.id===data.role_id;})[0]||{};
+      if (step===0) return '<h3>Who is this?</h3>'+
+        '<label class="fld"><span>Full name</span><input id="w-name" value="'+(data.full_name||'')+'" placeholder="Rania Haddad"></label>'+
+        '<label class="fld"><span>Email</span><input id="w-email" type="email" value="'+(data.email||'')+'" placeholder="name@gmail.com"></label>'+
+        '<p class="hint">A Gmail address works well for invites. Kitchen staff without email can be given a temporary password at step 5.</p>';
+      if (step===1) return '<h3>What do they do?</h3>'+
+        '<p class="hint">Only roles below your own authority are listed.</p><div class="pickrow">'+
+        assignable.map(function(r){ return '<label class="pick"><input type="radio" name="w-role" value="'+r.id+'"'+
+          (r.id===data.role_id?' checked':'')+'><span style="flex:1"><b>'+r.name+'</b><span>'+
+          (r.description||'')+'</span></span></label>'; }).join('')+'</div>';
+      if (step===2) return '<h3>Which branches?</h3><div class="pickrow">'+
+        S.restaurants.map(function(r){ return '<label class="pick"><input type="checkbox" value="'+r.id+'"'+
+          (data.restaurant_ids.indexOf(r.id)>-1?' checked':'')+'><span><b>'+r.name+'</b></span></label>';
+        }).join('')+'</div>';
+      if (step===3) return '<h3>What they&rsquo;ll be able to do</h3>'+
+        '<p class="hint">Granted by the <b>'+role.name+'</b> role and enforced in the database.</p>'+
+        '<div class="permwrap" id="w-perms">Loading&hellip;</div>';
+      if (step===4) return '<h3>How do they sign in?</h3><div class="pickrow">'+
+        '<label class="pick"><input type="radio" name="w-mode" value="invite"'+(data.mode==='invite'?' checked':'')+
+          '><span><b>Email them an invite</b><span>They set their own password. Recommended.</span></span></label>'+
+        '<label class="pick"><input type="radio" name="w-mode" value="temp"'+(data.mode==='temp'?' checked':'')+
+          '><span><b>Temporary password</b><span>For staff without email. They must change it on first login.</span></span></label>'+
+        '</div>'+(data.mode==='temp'
+          ? '<label class="fld"><span>Temporary password</span><input id="w-pass" value="'+(data.password||pw())+'"></label>'
+          : '');
+      var rn = S.restaurants.filter(function(r){return data.restaurant_ids.indexOf(r.id)>-1;})
+                 .map(function(r){return r.name;}).join(', ') || 'none';
+      return '<h3>Ready to create</h3><dl class="ukv">'+
+        '<dt>Name</dt><dd>'+(data.full_name||'—')+'</dd>'+
+        '<dt>Email</dt><dd>'+(data.email||'—')+'</dd>'+
+        '<dt>Role</dt><dd>'+role.name+'</dd>'+
+        '<dt>Branches</dt><dd>'+rn+'</dd>'+
+        '<dt>Sign-in</dt><dd>'+(data.mode==='invite'?'Emailed invite':'Temporary password')+'</dd></dl>';
+    }
+
+    function draw(){
+      host.innerHTML='<div class="udrawer__veil" data-x></div><div class="wiz" role="dialog" aria-modal="true">'+
+        '<div class="wiz__steps">'+STEPS.map(function(s,i){
+          return '<span class="'+(i===step?'is-on':(i<step?'is-done':''))+'">'+(i+1)+'. '+s+'</span>';}).join('')+'</div>'+
+        '<div class="wiz__body">'+body()+'</div>'+
+        '<div class="wiz__foot">'+
+          '<button class="btn btn--ghost btn--sm" type="button" id="w-back">'+(step===0?'Cancel':'Back')+'</button>'+
+          '<button class="btn btn--wine btn--sm" type="button" id="w-next">'+(step===5?'Create staff member':'Continue')+'</button>'+
+        '</div></div>';
+      host.classList.add('is-open');
+      host.querySelectorAll('[data-x]').forEach(function(b){b.onclick=close;});
+
+      if (step===1) host.querySelectorAll('[name=w-role]').forEach(function(r){
+        r.onchange=function(){ data.role_id=r.value; }; });
+      if (step===2) host.querySelectorAll('.pick input').forEach(function(cb){
+        cb.onchange=function(){
+          data.restaurant_ids = [].slice.call(host.querySelectorAll('.pick input:checked'))
+            .map(function(x){return x.value;}); }; });
+      if (step===3) Crew.sb.from('role_permissions').select('permissions(key)')
+        .eq('role_id', data.role_id).then(function(r){
+          var el=document.getElementById('w-perms'); if(!el) return;
+          el.innerHTML = (r.data||[]).map(function(x){
+            return '<span class="badge badge--own">'+x.permissions.key+'</span>';}).join('')
+            || '<span style="font-size:12px;color:var(--faint)">No permissions on this role yet.</span>'; });
+      if (step===4) host.querySelectorAll('[name=w-mode]').forEach(function(r){
+        r.onchange=function(){ data.mode=r.value; draw(); }; });
+
+      document.getElementById('w-back').onclick=function(){
+        if(step===0) return close();
+        step--; draw(); };
+      document.getElementById('w-next').onclick=async function(){
+        if(step===0){
+          data.full_name=(document.getElementById('w-name').value||'').trim();
+          data.email=(document.getElementById('w-email').value||'').trim();
+          if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email)) return alert('Enter a valid email address.');
+          if(!data.full_name) return alert('Enter their name.');
+        }
+        if(step===4 && data.mode==='temp'){
+          data.password=document.getElementById('w-pass').value;
+          if((data.password||'').length<10) return alert('Temporary password must be at least 10 characters.');
+        }
+        if(step<5){ step++; draw(); return; }
+        var btn=document.getElementById('w-next'); btn.disabled=true; btn.textContent='Creating…';
+        var r=await CrewUsers.fn('create_user', data);
+        if(r.error){ btn.disabled=false; btn.textContent='Create staff member'; alert(r.error); return; }
+        close(); await CrewUsers.load(); CrewUsers.render();
+        alert(data.mode==='invite'
+          ? 'Invite sent to '+data.email+'.'
+          : 'Created. Temporary password:\n\n'+data.password+'\n\nGive this to them directly — it is not shown again.');
+      };
+    }
+    function close(){ host.classList.remove('is-open'); host.innerHTML=''; }
+    draw();
+  }
+};
+</script><script>(async function(){var c = await Crew.requirePage('users');if(!c) return;CrewShell.render(c);if (window.CrewNotify) CrewNotify.mount(c);document.getElementById("crew-main").hidden = false;if (window.pageInit) window.pageInit(c);})();</script></body>
+</html>

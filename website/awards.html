@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Awards — Mosaic Lebanese Restaurant</title>
+<meta name="description" content="Nineteen awards since 2018, including What’s On Abu Dhabi 2026 Favourite Business Lunch and Favourite Casual Middle Eastern Restaurant.">
+<meta name="theme-color" content="#39497C">
+<meta property="og:title" content="Awards — Mosaic Lebanese Restaurant">
+<meta property="og:description" content="Nineteen awards since 2018, including What’s On Abu Dhabi 2026 Favourite Business Lunch and Favourite Casual Middle Eastern Restaurant.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/img/rooms/table.webp">
+<link rel="icon" href="assets/img/brand/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=PT+Sans:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="assets/css/site.css">
+<style>
+.certgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:clamp(16px,2.4vw,30px);}
+.cert{background:none;border:0;padding:0;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:11px;font:inherit;}
+.cert img{width:100%;border-radius:3px;box-shadow:0 14px 34px rgba(20,25,40,.16);transition:transform .35s,box-shadow .35s;}
+.cert:hover img,.cert:focus-visible img{transform:translateY(-8px);box-shadow:0 24px 50px rgba(20,25,40,.24);}
+.cert .y{font-family:var(--display);font-size:15px;color:var(--wine);}
+.cert .t{font-size:12.5px;line-height:1.42;color:var(--ink);}
+.cert .b{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
+#lightbox{position:fixed;inset:0;z-index:95;background:rgba(16,19,32,.96);display:none;
+  align-items:center;justify-content:center;flex-direction:column;gap:20px;padding:clamp(22px,5vw,58px);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
+#lightbox.is-open{display:flex;}
+#lightbox img{max-height:66svh;width:auto;box-shadow:0 36px 80px rgba(0,0,0,.7);}
+#lb-close{position:absolute;top:20px;right:24px;background:none;border:1px solid var(--on-dark-hair);
+  border-radius:50%;color:var(--on-dark);width:46px;height:46px;cursor:pointer;font-size:20px;}
+#lb-close:hover{border-color:var(--on-dark);}
+</style></head>
+<body class="">
+<header class="site-head">
+  <a class="brand" href="index.html">
+    <img src="assets/img/brand/logo.webp" alt="" width="44" height="44">
+    <span><span class="brand__name">MOSAIC</span><span class="brand__sub">Lebanese Restaurant</span></span>
+    <span class="visually-hidden">Mosaic Lebanese Restaurant — home</span>
+  </a>
+  <nav class="nav" aria-label="Primary"><a href="menu.html">Menu</a><a href="story.html">Our Story</a><a href="catering.html">Catering</a><a href="awards.html" aria-current="page">Awards</a><a href="contact.html">Contact</a></nav>
+  <div class="head-actions">
+    <a class="btn btn--ghost btn--sm" href="menu.html">Order Online</a>
+    <a class="btn btn--primary btn--sm" href="contact.html#book">Book a Table</a>
+    <button class="cart-btn" type="button" data-cart-open aria-label="Open your order"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h3l2.4 12.2a1.6 1.6 0 0 0 1.6 1.3h8.3a1.6 1.6 0 0 0 1.6-1.25L21.5 7H6"/></svg>
+      <span class="cart-btn__n" data-cart-count hidden>0</span></button>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6.5h17"/><path d="M3.5 12h17"/><path d="M3.5 17.5h17"/></svg></button>
+  </div>
+</header>
+<div class="drawer" id="drawer">
+  <div class="drawer__top">
+    <a class="brand" href="index.html"><img src="assets/img/brand/logo.webp" alt="" width="44" height="44">
+      <span><span class="brand__name">MOSAIC</span><span class="brand__sub">Lebanese Restaurant</span></span></a>
+    <button class="nav-toggle" type="button" data-drawer-close aria-label="Close menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></button>
+  </div>
+  <nav aria-label="Mobile"><a href="menu.html">Menu</a><a href="story.html">Our Story</a><a href="catering.html">Catering</a><a href="awards.html">Awards</a><a href="contact.html">Contact</a></nav>
+  <div class="drawer__cta">
+    <a class="btn btn--primary" href="contact.html#book">Book a Table</a>
+    <a class="btn btn--ghost" href="menu.html">Order Online</a>
+  </div>
+</div>
+<main id="main">
+<section class="banner">
+  <img class="banner__bg" src="assets/img/awards/stage.webp" alt="" loading="eager">
+  <div class="banner__scrim"></div>
+  <div class="wrap"><span class="eyebrow">Recognition</span><h1>Decided by the people<br>who eat here.</h1>
+    <p class="lede" style="max-width:640px;">Public-vote awards are a very direct piece of feedback. Every vote was somebody who ate with us, remembered it, and took the time to say so.</p></div>
+</section>
+<section class="band"><div class="wrap">
+  <div class="grid grid--2" style="align-items:center;gap:clamp(28px,5vw,72px);">
+    <div class="rv" style="display:flex;flex-direction:column;gap:20px;">
+      <span class="eyebrow">August 2026</span>
+      <h2 style="font-size:clamp(26px,4vw,46px);">Two branches. Two titles.<br>One vote that came from you.</h2>
+      <p class="lede">Mosaic closed the What&rsquo;s On Abu Dhabi Awards 2026 with two wins in a single
+         evening &mdash; a result that puts both of our addresses on the capital&rsquo;s official list of favourites.</p>
+      <p style="color:var(--muted);font-size:15px;">Published by Motivate Media Group, the awards run across
+         37 categories, every one decided by public vote. Al Najda was named Favourite Business Lunch;
+         Al Muroor, Favourite Casual Middle Eastern Restaurant.</p>
+    </div>
+    <div class="grid grid--2 rv" style="align-items:start;">
+      <img src="assets/img/awards/trophies.webp" alt="The 2026 trophies" loading="lazy" style="width:100%;">
+      <img src="assets/img/awards/ceremony.webp" alt="Mosaic receiving the Favourite Business Lunch award" loading="lazy" style="width:100%;margin-top:30px;">
+    </div>
+  </div>
+</div></section>
+<section class="band band--sand"><div class="wrap">
+  <div class="section-head rv"><span class="eyebrow">The wall</span>
+    <h2>Every certificate, since 2018.</h2>
+    <p class="lede" style="max-width:540px;">Nineteen of them. Tap any one to read it.</p></div>
+  <div class="certgrid"><button class="cert" type="button" data-img="assets/img/awards/cert-2516.webp"
+      data-title="Favourite Casual Middle Eastern Restaurant" data-body="What&rsquo;s On Awards · 2025 · Al Muroor">
+    <img src="assets/img/awards/cert-2516.webp" alt="Favourite Casual Middle Eastern Restaurant" loading="lazy">
+    <span class="y">2025</span><span class="t">Favourite Casual Middle Eastern Restaurant</span>
+    <span class="b">What&rsquo;s On Awards · Al Muroor</span></button><button class="cert" type="button" data-img="assets/img/awards/cert-2503.webp"
+      data-title="Chef of the Year &mdash; Chef Hassane El Baroudi" data-body="What&rsquo;s On Awards · 2025">
+    <img src="assets/img/awards/cert-2503.webp" alt="Chef of the Year &mdash; Chef Hassane El Baroudi" loading="lazy">
+    <span class="y">2025</span><span class="t">Chef of the Year &mdash; Chef Hassane El Baroudi</span>
+    <span class="b">What&rsquo;s On Awards</span></button><button class="cert" type="button" data-img="assets/img/awards/cert-2530.webp"
+      data-title="Best of the Best &mdash; Top 1% of World&rsquo;s Best Restaurants" data-body="Tripadvisor Travellers&rsquo; Choice · 2025">
+    <img src="assets/img/awards/cert-2530.webp" alt="Best of the Best &mdash; Top 1% of World&rsquo;s Best Restaurants" loading="lazy">
+    <span class="y">2025</span><span class="t">Best of the Best &mdash; Top 1% of World&rsquo;s Best Restaurants</span>
+    <span class="b">Tripadvisor Travellers&rsquo; Choice</span></button><button class="cert" type="button" data-img="assets/img/awards/cert-2505.webp"
+      data-title="Winner" data-body="FACT Dining Awards Abu Dhabi · 2025 · Muroor">
+    <img src="assets/img/awards/cert-2505.webp" alt="Winner" loading="lazy">
+    <span class="y">2025</span><span class="t">Winner</span>
+    <span class="b">FACT Dining Awards Abu Dhabi · Muroor</span></button><button class="cert" type="button" data-img="assets/img/awards/cert-2557.webp"
+      data-title="Highly Commended &mdash; Favourite Middle Eastern Restaurant" data-body="What&rsquo;s On Awards · 2024 · Muroor">
+    <img src="assets/img/awards/cert-2557.webp" alt="Highly Commended &mdash; Favourite Middle Eastern Restaurant" loading="lazy">
+    <span class="y">2024</span><span class="t">Highly Commended &mdash; Favourite Middle Eastern Restaurant</span>
+    <span class="b">What&rsquo;s On Awards · Muroor</span></button><button class="cert" type="button" data-img="assets/img/awards/cert-2511.webp"
+      data-title="Travelers&rsquo; Choice" data-body="Tripadvisor · 2023">
+    <img src="assets/img/awards/cert-2511.webp" alt="Travelers&rsquo; Choice" loading="lazy">
+    <span class="y">2023</span><span class="t">Travelers&rsquo; Choice</span>
+    <span class="b">Tripadvisor</span></button><button class="cert" type="button" data-img="assets/img/awards/cert-2564.webp"
+      data-title="Winner &mdash; Business Lunch, UAE" data-body="BBC Good Food Middle East Magazine Awards · 2022">
+    <img src="assets/img/awards/cert-2564.webp" alt="Winner &mdash; Business Lunch, UAE" loading="lazy">
+    <span class="y">2022</span><span class="t">Winner &mdash; Business Lunch, UAE</span>
+    <span class="b">BBC Good Food Middle East Magazine Awards</span></button><button class="cert" type="button" data-img="assets/img/awards/cert-2524.webp"
+      data-title="Winner &mdash; Favourite Middle Eastern Restaurant" data-body="What&rsquo;s On Awards · 2022 · Muroor">
+    <img src="assets/img/awards/cert-2524.webp" alt="Winner &mdash; Favourite Middle Eastern Restaurant" loading="lazy">
+    <span class="y">2022</span><span class="t">Winner &mdash; Favourite Middle Eastern Restaurant</span>
+    <span class="b">What&rsquo;s On Awards · Muroor</span></button><button class="cert" type="button" data-img="assets/img/awards/cert-2560.webp"
+      data-title="Travelers&rsquo; Choice" data-body="Tripadvisor · 2022">
+    <img src="assets/img/awards/cert-2560.webp" alt="Travelers&rsquo; Choice" loading="lazy">
+    <span class="y">2022</span><span class="t">Travelers&rsquo; Choice</span>
+    <span class="b">Tripadvisor</span></button><button class="cert" type="button" data-img="assets/img/awards/cert-2543.webp"
+      data-title="Travelers&rsquo; Choice" data-body="Tripadvisor · 2020">
+    <img src="assets/img/awards/cert-2543.webp" alt="Travelers&rsquo; Choice" loading="lazy">
+    <span class="y">2020</span><span class="t">Travelers&rsquo; Choice</span>
+    <span class="b">Tripadvisor</span></button><button class="cert" type="button" data-img="assets/img/awards/cert-2552.webp"
+      data-title="Winner &mdash; Middle Eastern Restaurant, Abu Dhabi" data-body="BBC Good Food Middle East Magazine Awards · 2019">
+    <img src="assets/img/awards/cert-2552.webp" alt="Winner &mdash; Middle Eastern Restaurant, Abu Dhabi" loading="lazy">
+    <span class="y">2019</span><span class="t">Winner &mdash; Middle Eastern Restaurant, Abu Dhabi</span>
+    <span class="b">BBC Good Food Middle East Magazine Awards</span></button><button class="cert" type="button" data-img="assets/img/awards/cert-2536.webp"
+      data-title="Finalist &mdash; Favourite Business Lunch" data-body="What&rsquo;s On Awards · 2019">
+    <img src="assets/img/awards/cert-2536.webp" alt="Finalist &mdash; Favourite Business Lunch" loading="lazy">
+    <span class="y">2019</span><span class="t">Finalist &mdash; Favourite Business Lunch</span>
+    <span class="b">What&rsquo;s On Awards</span></button><button class="cert" type="button" data-img="assets/img/awards/cert-2525.webp"
+      data-title="Certificate of Excellence" data-body="Tripadvisor · 2019">
+    <img src="assets/img/awards/cert-2525.webp" alt="Certificate of Excellence" loading="lazy">
+    <span class="y">2019</span><span class="t">Certificate of Excellence</span>
+    <span class="b">Tripadvisor</span></button><button class="cert" type="button" data-img="assets/img/awards/cert-2539.webp"
+      data-title="Winner &mdash; Favourite Middle Eastern Restaurant" data-body="What&rsquo;s On Awards · 2018">
+    <img src="assets/img/awards/cert-2539.webp" alt="Winner &mdash; Favourite Middle Eastern Restaurant" loading="lazy">
+    <span class="y">2018</span><span class="t">Winner &mdash; Favourite Middle Eastern Restaurant</span>
+    <span class="b">What&rsquo;s On Awards</span></button><button class="cert" type="button" data-img="assets/img/awards/cert-2521.webp"
+      data-title="Best Middle Eastern Casual Dine" data-body="Zomato Users&rsquo; Choice Awards · 2018">
+    <img src="assets/img/awards/cert-2521.webp" alt="Best Middle Eastern Casual Dine" loading="lazy">
+    <span class="y">2018</span><span class="t">Best Middle Eastern Casual Dine</span>
+    <span class="b">Zomato Users&rsquo; Choice Awards</span></button><button class="cert" type="button" data-img="assets/img/awards/cert-2528.webp"
+      data-title="Certificate of Excellence" data-body="Tripadvisor · 2018">
+    <img src="assets/img/awards/cert-2528.webp" alt="Certificate of Excellence" loading="lazy">
+    <span class="y">2018</span><span class="t">Certificate of Excellence</span>
+    <span class="b">Tripadvisor</span></button><button class="cert" type="button" data-img="assets/img/awards/cert-2507.webp"
+      data-title="ISO 9001:2015 &mdash; Quality Management" data-body="IQA Certification">
+    <img src="assets/img/awards/cert-2507.webp" alt="ISO 9001:2015 &mdash; Quality Management" loading="lazy">
+    <span class="y">Certified</span><span class="t">ISO 9001:2015 &mdash; Quality Management</span>
+    <span class="b">IQA Certification</span></button><button class="cert" type="button" data-img="assets/img/awards/cert-2514.webp"
+      data-title="ISO 22000:2018 &mdash; Food Safety Management" data-body="APEX Certification">
+    <img src="assets/img/awards/cert-2514.webp" alt="ISO 22000:2018 &mdash; Food Safety Management" loading="lazy">
+    <span class="y">Certified</span><span class="t">ISO 22000:2018 &mdash; Food Safety Management</span>
+    <span class="b">APEX Certification</span></button><button class="cert" type="button" data-img="assets/img/awards/cert-2533.webp"
+      data-title="95.83% Excellent Hygiene" data-body="Zomato Hygiene Audit, NSD Gulf Ltd">
+    <img src="assets/img/awards/cert-2533.webp" alt="95.83% Excellent Hygiene" loading="lazy">
+    <span class="y">Certified</span><span class="t">95.83% Excellent Hygiene</span>
+    <span class="b">Zomato Hygiene Audit, NSD Gulf Ltd</span></button></div>
+</div></section>
+<div id="lightbox" role="dialog" aria-modal="true" aria-label="Award certificate">
+  <button id="lb-close" type="button" aria-label="Close">&times;</button>
+  <img id="lb-img" src="" alt="">
+  <div style="text-align:center;display:flex;flex-direction:column;gap:6px;max-width:620px;">
+    <span class="disp" id="lb-title" style="font-size:clamp(17px,2.2vw,24px);color:var(--on-dark);"></span>
+    <span id="lb-body" style="font-size:13px;color:var(--on-dark-muted);"></span></div>
+</div>
+
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-col">
+        <a class="brand" href="index.html"><img src="assets/img/brand/logo.webp" alt="" width="44" height="44">
+          <span><span class="brand__name">MOSAIC</span><span class="brand__sub">Lebanese Restaurant</span></span></a>
+        <p style="max-width:280px;margin-top:6px;">A kaleidoscope of Lebanese dishes, served in Abu Dhabi
+           across two addresses.</p>
+        <div class="socials"><a href="https://www.instagram.com/mosaic.restaurant" target="_blank" rel="noopener" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.1"/><circle cx="17.3" cy="6.7" r=".9" fill="currentColor" stroke="none"/></svg></a><a href="https://www.facebook.com/mosaic.lebanese.restaurant" target="_blank" rel="noopener" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.6 8.4V6.9c0-.8.4-1.2 1.3-1.2h1.4V2.9h-2.4c-2.5 0-3.7 1.5-3.7 3.7v1.8H9v2.9h2.2V21h3.4v-9.7h2.4l.4-2.9Z"/></svg></a><a href="https://www.tiktok.com/@mosaic.ae" target="_blank" rel="noopener" aria-label="TikTok"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.2 3h2.6a4.9 4.9 0 0 0 4.2 4.3v2.6a7.5 7.5 0 0 1-4.2-1.4v6.1a5.7 5.7 0 1 1-5.7-5.7c.3 0 .6 0 .9.1v2.7a3 3 0 1 0 2.2 2.9Z"/></svg></a><a href="https://www.youtube.com/@mosaic.restaurant" target="_blank" rel="noopener" aria-label="YouTube"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.6" y="5.4" width="18.8" height="13.2" rx="3.6"/><path d="m10.4 9.4 5 2.6-5 2.6Z"/></svg></a><a href="https://www.linkedin.com/company/mosaic-lebanese-restaurant" target="_blank" rel="noopener" aria-label="LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2.4"/><path d="M7.4 10.4V17"/><circle cx="7.4" cy="7.2" r="1.1" fill="currentColor" stroke="none"/><path d="M11.6 17v-3.7a2.1 2.1 0 0 1 4.2 0V17"/><path d="M11.6 10.4V17"/></svg></a></div>
+      </div>
+    <div class="foot-col">
+      <h4>Al Muroor</h4>
+      <p>Al Sa&rsquo;ada area, Al Rumaithi street<br>Guardian Towers, Abu Dhabi</p>
+      <a href="tel:022340202" class="num">02 234 0202</a>
+    </div>
+    <div class="foot-col">
+      <h4>Al Najda</h4>
+      <p>Mohammed Bin Butti street, facing Al Sultan Bakery<br>Vision Towers, Abu Dhabi</p>
+      <a href="tel:026226122" class="num">02 622 6122</a>
+    </div>
+      <div class="foot-col">
+        <h4>Opening hours</h4>
+        <p class="num">Sat &ndash; Thu &nbsp;8:00 &ndash; 23:30<br>Friday &nbsp;13:30 &ndash; 23:30</p>
+        <a href="mailto:info@mosaic-ae.com">info@mosaic-ae.com</a>
+        <a href="mailto:catering@mosaic-ae.com">catering@mosaic-ae.com</a>
+      </div>
+    </div>
+    <hr class="hair" style="margin:clamp(28px,4vw,44px) 0 0;">
+    <div class="foot-bottom">
+      <span>Mosaic Lebanese Restaurant &middot; Abu Dhabi</span>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;">
+        <a href="#">Mosaic Catering</a><a href="#">La Tartine P&acirc;tisserie</a>
+        <a href="#">Nazira Kitchen</a><a href="#">Salatoush</a><a href="#">Space Bun</a>
+      </div>
+    </div>
+  </div>
+</footer>
+<script src="assets/js/booking-store.js" defer></script>
+<script src="assets/js/cart.js" defer></script>
+<script src="assets/js/site.js" defer></script>
+<script>
+(function(){var lb=document.getElementById('lightbox'),im=document.getElementById('lb-img'),
+ ti=document.getElementById('lb-title'),bo=document.getElementById('lb-body'),
+ cl=document.getElementById('lb-close'),last=null;
+function open(b){last=document.activeElement;im.src=b.dataset.img;im.alt=b.dataset.title;
+ ti.innerHTML=b.dataset.title;bo.innerHTML=b.dataset.body;lb.classList.add('is-open');cl.focus();}
+function close(){lb.classList.remove('is-open');last&&last.focus();}
+document.querySelectorAll('.cert').forEach(function(b){b.addEventListener('click',function(){open(b);});});
+cl.addEventListener('click',close);
+lb.addEventListener('click',function(e){if(e.target===lb)close();});
+addEventListener('keydown',function(e){if(e.key==='Escape'&&lb.classList.contains('is-open'))close();});
+})();
+</script></body>
+</html>

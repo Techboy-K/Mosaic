@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orders — Mosaic Crew</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#141928">
+<link rel="icon" href="../assets/img/brand/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=PT+Sans:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/crew.css">
+</head>
+<body class="crew">
+<div id="crew-shell"></div>
+<main id="crew-main" hidden>
+
+  <div class="crew-title"><div><h1>Orders</h1><p id="o-sub">Your active orders</p></div>
+    <a class="btn btn--wine btn--sm" href="new-order.html">New order</a></div>
+  <div id="o-sound"></div>
+  <div class="oq" id="o-list"><p class="crew-empty">Loading…</p></div>
+
+</main>
+<script src="../assets/js/vendor/supabase.min.js"></script>
+<script src="../assets/js/crew/config.js"></script>
+<script src="../assets/js/crew/auth.js"></script>
+<script src="../assets/js/crew/shell.js"></script>
+<script src="../assets/js/crew/orders.js"></script><script>
+window.pageInit = async function(c){
+  await CrewOrders.statusDefs();
+  document.getElementById('o-sound').innerHTML = CrewOrders.soundBar();
+  var ACTIVE=['DRAFT','SUBMITTED','READY','SERVED','NEEDS_ATTENTION'];
+  async function draw(){
+    var rows = await CrewOrders.fetchOrders(ACTIVE, {mine:true});
+    document.getElementById('o-sub').textContent =
+      rows.length ? rows.length+' active' : 'Nothing active right now';
+    document.getElementById('o-list').innerHTML = CrewOrders.renderGrouped(rows, function(o){
+          if(o.status==='DRAFT')  return '<button class="btn btn--wine" data-go="SUBMITTED" data-id="'+o.id+'">Submit</button>';
+          if(o.status==='SUBMITTED') return '<button class="btn btn--wine" data-go="SENT_TO_KITCHEN" data-id="'+o.id+'">Send to kitchen</button>';
+          if(o.status==='READY')  return '<button class="btn btn--wine" data-go="SERVED" data-id="'+o.id+'">Mark served</button>';
+          if(o.status==='SERVED') return '<button class="btn btn--ghost" data-go="COMPLETED" data-id="'+o.id+'">Complete</button>';
+          return '<span class="ocard__age">With the kitchen</span>';
+        }, 'No active orders. Tap <b>New order</b> to start one.');
+    document.querySelectorAll('[data-go]').forEach(function(b){
+      b.onclick=async function(){ b.disabled=true;
+        await CrewOrders.move(b.dataset.id, b.dataset.go); draw(); };});
+  }
+  await draw();
+  CrewOrders.watch(draw);
+  document.addEventListener('orders:changed', draw);
+  document.addEventListener('crew:restaurant', draw);
+  setInterval(draw, 60000);
+};
+</script><script>(async function(){var c = await Crew.requirePage('orders');if(!c) return;CrewShell.render(c);if (window.CrewNotify) CrewNotify.mount(c);document.getElementById("crew-main").hidden = false;if (window.pageInit) window.pageInit(c);})();</script></body>
+</html>

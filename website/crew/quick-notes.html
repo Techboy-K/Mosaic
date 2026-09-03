@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quick notes — Mosaic Crew</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#141928">
+<link rel="icon" href="../assets/img/brand/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=PT+Sans:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/crew.css">
+</head>
+<body class="crew">
+<div id="crew-shell"></div>
+<main id="crew-main" hidden>
+
+  <div class="crew-title"><div><h1>Quick note</h1>
+    <p>Backup capture. Type it as you would on paper &mdash; this is <b>not</b> a structured
+       order until someone converts it.</p></div></div>
+  <div class="panel-c" style="padding:18px;max-width:520px;display:flex;flex-direction:column;gap:12px;">
+    <label class="fld"><span>Table</span><input id="qn-table" placeholder="12"></label>
+    <label class="fld"><span>The order</span>
+      <textarea id="qn-text" rows="9" style="min-height:200px;font-size:16px"
+        placeholder="2 Ribeye&#10;1 Caesar salad&#10;1 Coke&#10;No onions"></textarea></label>
+    <button class="btn btn--wine" id="qn-save" style="width:100%">Save note</button>
+    <p class="crew-note" style="text-align:left">Saved notes appear for supervisors and can be
+       turned into a real order later.</p>
+  </div>
+  <div style="margin-top:20px"><h2 style="font-size:16px;margin-bottom:10px">Your recent notes</h2>
+    <div class="oq" id="qn-list"></div></div>
+
+</main>
+<script src="../assets/js/vendor/supabase.min.js"></script>
+<script src="../assets/js/crew/config.js"></script>
+<script src="../assets/js/crew/auth.js"></script>
+<script src="../assets/js/crew/shell.js"></script>
+<script src="../assets/js/crew/orders.js"></script><script>
+window.pageInit = async function(c){
+  await CrewOrders.statusDefs();
+  async function draw(){
+    var r=await Crew.sb.from('orders').select('*, order_items(*)')
+      .eq('is_quick_note',true).eq('created_by',c.user.id)
+      .order('created_at',{ascending:false}).limit(12);
+    document.getElementById('qn-list').innerHTML=(r.data||[]).length
+      ? (r.data).map(function(o){return CrewOrders.card(o,null);}).join('')
+      : '<p class="crew-empty">No notes yet.</p>';
+  }
+  document.getElementById('qn-save').onclick=async function(){
+    var txt=document.getElementById('qn-text').value.trim();
+    if(!txt) return alert('Write the order first.');
+    var rid=(CrewShell.restaurant()!=='all'?CrewShell.restaurant():(c.restaurants[0]||{}).id);
+    if(!rid) return alert('Pick a branch first.');
+    var b=this; b.disabled=true; b.textContent='Saving…';
+    var o=await Crew.sb.from('orders').insert({
+      restaurant_id:rid, created_by:c.user.id, owner_id:c.user.id,
+      table_label:document.getElementById('qn-table').value||null,
+      is_quick_note:true, quick_note_text:txt }).select().single();
+    b.disabled=false; b.textContent='Save note';
+    if(o.error) return alert(o.error.message);
+    document.getElementById('qn-text').value=''; document.getElementById('qn-table').value='';
+    draw();
+  };
+  draw();
+};
+</script><script>(async function(){var c = await Crew.requirePage('quick-notes');if(!c) return;CrewShell.render(c);if (window.CrewNotify) CrewNotify.mount(c);document.getElementById("crew-main").hidden = false;if (window.pageInit) window.pageInit(c);})();</script></body>
+</html>

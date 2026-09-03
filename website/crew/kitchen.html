@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kitchen — Mosaic Crew</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#141928">
+<link rel="icon" href="../assets/img/brand/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=PT+Sans:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/crew.css">
+</head>
+<body class="crew">
+<div id="crew-shell"></div>
+<main id="crew-main" hidden>
+
+  <div class="crew-title"><div><h1 id="k-title">Kitchen</h1><p id="k-sub"></p></div>
+    <div id="k-scope"></div></div>
+  <div id="k-sound"></div>
+  <div id="k-list"><p class="crew-empty">Loading…</p></div>
+
+</main>
+<script src="../assets/js/vendor/supabase.min.js"></script>
+<script src="../assets/js/crew/config.js"></script>
+<script src="../assets/js/crew/auth.js"></script>
+<script src="../assets/js/crew/shell.js"></script>
+<script src="../assets/js/crew/orders.js"></script><script>
+window.pageInit = async function(c){
+  var defs = await CrewOrders.statusDefs();
+  document.getElementById('k-sound').innerHTML = CrewOrders.soundBar();
+
+  /* A chef owns two states and should not be shown anything else. A supervisor
+     and above oversee the whole pass, so an order they mark ready must not
+     vanish on them — they keep the full pipeline in view. */
+  var oversees = Crew.can('orders.view_all');
+  var COOK  = ['SENT_TO_KITCHEN','IN_PREPARATION','NEEDS_ATTENTION'];
+  var FULL  = ['SUBMITTED','SENT_TO_KITCHEN','IN_PREPARATION','READY','SERVED','NEEDS_ATTENTION'];
+  var scope = oversees ? (localStorage.getItem('mosaic.kitchen.scope') || 'full') : 'cook';
+
+  if (oversees) {
+    document.getElementById('k-scope').innerHTML =
+      '<div class="segbtn" role="group" aria-label="What to show">' +
+        '<button type="button" data-s="full" aria-pressed="'+(scope==='full')+'">Whole pass</button>' +
+        '<button type="button" data-s="cook" aria-pressed="'+(scope==='cook')+'">Kitchen only</button>' +
+      '</div>';
+    document.querySelectorAll('[data-s]').forEach(function(b){
+      b.onclick=function(){ scope=b.dataset.s;
+        localStorage.setItem('mosaic.kitchen.scope',scope); draw(); };});
+  }
+
+  function actions(o){
+    if(o.status==='SUBMITTED')
+      return '<button class="btn btn--ghost" data-go="SENT_TO_KITCHEN" data-id="'+o.id+'">Send to kitchen</button>';
+    if(o.status==='SENT_TO_KITCHEN')
+      return '<button class="btn btn--wine" data-go="IN_PREPARATION" data-id="'+o.id+'">Start</button>';
+    if(o.status==='IN_PREPARATION')
+      return '<button class="btn btn--wine" data-go="READY" data-id="'+o.id+'">Ready</button>';
+    if(o.status==='READY')
+      return oversees
+        ? '<span class="kwait">Waiting for a waiter</span>' +
+          '<button class="btn btn--ghost" data-go="IN_PREPARATION" data-id="'+o.id+'">Back to kitchen</button>'
+        : '';
+    if(o.status==='SERVED') return '<span class="kwait">Served</span>';
+    return '<button class="btn btn--ghost" data-go="IN_PREPARATION" data-id="'+o.id+'">Take it</button>';
+  }
+
+  async function draw(){
+    var want = scope==='full' ? FULL : COOK;
+    var rows = await CrewOrders.fetchOrders(want);
+    document.getElementById('k-title').textContent = scope==='full' ? 'The pass' : 'Kitchen';
+
+    if(scope==='cook'){
+      var n=rows.length;
+      document.getElementById('k-sub').textContent = n ? n+' in the queue' : 'Queue is clear';
+      document.getElementById('k-list').innerHTML =
+        CrewOrders.renderGrouped(rows, actions, 'Nothing to cook. Enjoy the quiet.');
+    } else {
+      /* lanes across the whole pass, so a supervisor watches an order all the
+         way from the waiter to the table instead of losing it at each handoff */
+      var LANES=['SUBMITTED','SENT_TO_KITCHEN','IN_PREPARATION','READY','SERVED'];
+      var att=rows.filter(function(o){return o.status==='NEEDS_ATTENTION';});
+      document.getElementById('k-sub').textContent =
+        rows.length+' live'+(att.length?' · '+att.length+' need attention':'');
+      document.getElementById('k-list').innerHTML =
+        (att.length? '<section class="klane klane--att"><header><b>Needs attention</b><i>'+att.length+
+          '</i></header><div class="klane__b">'+att.map(function(o){
+            return CrewOrders.card(o,actions,{hideStatus:true}); }).join('')+'</div></section>' : '')+
+        '<div class="kb">'+LANES.map(function(k){
+          var col=rows.filter(function(o){return o.status===k;});
+          return '<section class="kbcol" data-k="'+k+'"><header style="--c:'+defs[k].colour+'">'+
+            '<b>'+defs[k].label+'</b><i>'+col.length+'</i></header><div class="kbcol__b">'+
+            (col.length? col.map(function(o){
+              return CrewOrders.card(o,actions,{hideStatus:true}); }).join('')
+              : '<p class="kbcol__e">&mdash;</p>')+
+          '</div></section>'; }).join('')+'</div>';
+    }
+
+    document.querySelectorAll('[data-go]').forEach(function(b){
+      b.onclick=async function(e){ e.stopPropagation(); b.disabled=true;
+        await CrewOrders.move(b.dataset.id,b.dataset.go); draw(); };});
+  }
+
+  await draw(); CrewOrders.watch(draw);
+  document.addEventListener('orders:changed',draw);
+  setInterval(draw,45000);
+};
+</script><script>(async function(){var c = await Crew.requirePage('kitchen');if(!c) return;CrewShell.render(c);if (window.CrewNotify) CrewNotify.mount(c);document.getElementById("crew-main").hidden = false;if (window.pageInit) window.pageInit(c);})();</script></body>
+</html>

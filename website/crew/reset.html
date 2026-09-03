@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Set your password — Mosaic Crew</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#141928">
+<link rel="icon" href="../assets/img/brand/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=PT+Sans:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/crew.css">
+</head>
+<body class="crew">
+
+<div class="crew-login"><form class="crew-login__card" id="rs-form">
+  <div class="crew-login__logo"><img src="../assets/img/brand/logo.webp" alt="">
+    <b>MOSAIC</b><span>Set your password</span></div>
+  <div class="crew-err" id="rs-err" hidden></div>
+  <label class="fld"><span>New password</span>
+    <input id="rs-pw" type="password" required placeholder="At least 10 characters"></label>
+  <button class="btn btn--wine" type="submit" style="width:100%">Save and sign in</button>
+</form></div>
+<script src="../assets/js/vendor/supabase.min.js"></script>
+<script src="../assets/js/crew/config.js"></script>
+<script src="../assets/js/crew/auth.js"></script>
+<script src="../assets/js/crew/shell.js"></script>
+<script>
+document.getElementById('rs-form').addEventListener('submit', async function(e){
+  e.preventDefault();
+  var pw=document.getElementById('rs-pw').value, err=document.getElementById('rs-err');
+  if(pw.length<10){ err.textContent='At least 10 characters.'; err.hidden=false; return; }
+  var r=await Crew.sb.auth.updateUser({password:pw});
+  if(r.error){ err.textContent=r.error.message; err.hidden=false; return; }
+  var c=await Crew.load();
+  location.replace(c?Crew.homeFor(c):'index.html');
+});
+</script></body>
+</html>

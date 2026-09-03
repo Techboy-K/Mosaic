@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu — Mosaic Lebanese Restaurant</title>
+<meta name="description" content="The full Mosaic menu: 250 Lebanese dishes across 19 categories, with prices in AED. Mezze, charcoal grills, shawarma, manakish and more.">
+<meta name="theme-color" content="#39497C">
+<meta property="og:title" content="Menu — Mosaic Lebanese Restaurant">
+<meta property="og:description" content="The full Mosaic menu: 250 Lebanese dishes across 19 categories, with prices in AED. Mezze, charcoal grills, shawarma, manakish and more.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/img/rooms/table.webp">
+<link rel="icon" href="assets/img/brand/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=PT+Sans:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="assets/css/site.css">
+<style>
+/* ---------- toolbar ---------- */
+.mtools{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.96);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--hair);}
+.mtools__row{display:flex;align-items:center;gap:14px;padding:13px 0;flex-wrap:wrap;}
+.msearch{display:flex;align-items:center;gap:10px;border:1px solid var(--hair);background:var(--paper);border-radius:var(--r);
+  padding:0 14px;min-height:46px;flex:1;min-width:210px;max-width:360px;color:var(--faint);
+  transition:border-color .2s;}
+.msearch:focus-within{border-color:var(--gold);}
+.msearch input{background:none;border:0;color:var(--ink);font:inherit;font-size:14px;width:100%;outline:none;}
+.msearch input::placeholder{color:var(--faint);}
+.msearch button{background:none;border:0;color:var(--faint);cursor:pointer;padding:4px;line-height:0;}
+.msearch button:hover{color:var(--ink);}
+.mcount{font-size:12.5px;color:var(--faint);white-space:nowrap;}
+.mchips{display:none;gap:8px;overflow-x:auto;padding:0 0 12px;scrollbar-width:none;
+  -webkit-mask-image:linear-gradient(90deg,#000 0,#000 93%,transparent 100%);}
+.mchips::-webkit-scrollbar{display:none;}
+.chip{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;min-height:38px;padding:0 15px;
+  border:1px solid var(--hair);border-radius:var(--r);background:var(--paper);color:var(--ink-2);
+  font:inherit;font-size:12.5px;cursor:pointer;transition:.2s;}
+.chip:hover{border-color:var(--gold);color:var(--ink);}
+.chip.is-on{background:var(--wine);color:#FFF3E6;border-color:var(--wine);}
+.chip .num{opacity:.5;font-size:11px;}
+.chip.is-on .num{opacity:.6;}
+@media(max-width:1023px){.mchips{display:flex;}}
+
+/* ---------- layout ---------- */
+.mlayout{display:grid;grid-template-columns:236px 1fr;gap:clamp(28px,4vw,56px);align-items:start;}
+@media(max-width:1023px){.mlayout{grid-template-columns:1fr;}}
+.rail{position:sticky;top:132px;display:flex;flex-direction:column;gap:1px;max-height:calc(100svh - 170px);
+  overflow-y:auto;scrollbar-width:thin;}
+@media(max-width:1023px){.rail{display:none;}}
+.rail__item{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;
+  background:none;border:0;border-left:2px solid transparent;padding:10px 14px;cursor:pointer;
+  font:inherit;font-size:14px;color:var(--muted);text-align:left;transition:.18s;}
+.rail__item:hover{color:var(--wine);background:var(--paper);}
+.rail__item.is-on{color:var(--wine);border-left-color:var(--gold);background:var(--paper);font-weight:500;}
+.rail__item .num{font-size:11.5px;color:var(--faint);}
+
+.mhead{display:flex;align-items:baseline;justify-content:space-between;gap:18px;flex-wrap:wrap;
+  padding-bottom:18px;margin-bottom:clamp(20px,3vw,30px);border-bottom:1px solid var(--hair);}
+.mhead h2{font-size:clamp(24px,3.2vw,38px);}
+.mhead p{font-size:13px;color:var(--faint);letter-spacing:.04em;}
+
+/* ---------- dish cards ---------- */
+.dishgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));
+  gap:clamp(14px,1.6vw,22px);}
+.dish{display:flex;flex-direction:column;background:var(--paper);border:1px solid var(--hair-2);
+  border-radius:6px;overflow:hidden;box-shadow:0 2px 12px rgba(20,25,40,.05);
+  transition:box-shadow .28s,transform .28s;scroll-margin-top:170px;}
+.dish:hover{box-shadow:0 14px 34px rgba(20,25,40,.11);transform:translateY(-3px);}
+.dish.is-target{border-color:var(--gold);}
+.dish__media{position:relative;overflow:hidden;background:var(--sand);}
+.dish__img{width:100%;height:172px;object-fit:cover;display:block;transition:transform .5s;}
+.dish:hover .dish__img{transform:scale(1.045);}
+.dish__img--none{display:block;height:172px;background:
+  repeating-linear-gradient(135deg,var(--sand) 0 10px,var(--sand-2) 10px 20px);}
+.dish__tag{position:absolute;top:10px;left:10px;background:rgba(255,255,255,.93);color:var(--wine);border-radius:var(--r);
+  font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;padding:5px 9px;}
+.dish__body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1;}
+.dish__row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;}
+.dish__row h3{font-size:17.5px;line-height:1.25;}
+.dish__price{font-family:var(--display);font-size:19px;color:var(--wine);white-space:nowrap;}
+.dish__price i{font-style:normal;font-size:9.5px;letter-spacing:.13em;color:var(--faint);margin-left:4px;}
+.dish__body p{font-size:13px;line-height:1.55;color:var(--muted);flex:1;}
+.dish__add{margin-top:4px;align-self:flex-start;background:none;border:1px solid var(--hair);
+  border-radius:var(--r);color:var(--muted);font:inherit;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  font-weight:600;padding:9px 14px;cursor:pointer;transition:.2s;}
+.dish__add:hover{border-color:var(--gold);color:var(--gold-h);background:var(--gold-p);}
+#menu-empty{padding:60px 0;text-align:center;}
+</style></head>
+<body class="">
+<header class="site-head">
+  <a class="brand" href="index.html">
+    <img src="assets/img/brand/logo.webp" alt="" width="44" height="44">
+    <span><span class="brand__name">MOSAIC</span><span class="brand__sub">Lebanese Restaurant</span></span>
+    <span class="visually-hidden">Mosaic Lebanese Restaurant — home</span>
+  </a>
+  <nav class="nav" aria-label="Primary"><a href="menu.html" aria-current="page">Menu</a><a href="story.html">Our Story</a><a href="catering.html">Catering</a><a href="awards.html">Awards</a><a href="contact.html">Contact</a></nav>
+  <div class="head-actions">
+    <a class="btn btn--ghost btn--sm" href="menu.html">Order Online</a>
+    <a class="btn btn--primary btn--sm" href="contact.html#book">Book a Table</a>
+    <button class="cart-btn" type="button" data-cart-open aria-label="Open your order"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h3l2.4 12.2a1.6 1.6 0 0 0 1.6 1.3h8.3a1.6 1.6 0 0 0 1.6-1.25L21.5 7H6"/></svg>
+      <span class="cart-btn__n" data-cart-count hidden>0</span></button>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6.5h17"/><path d="M3.5 12h17"/><path d="M3.5 17.5h17"/></svg></button>
+  </div>
+</header>
+<div class="drawer" id="drawer">
+  <div class="drawer__top">
+    <a class="brand" href="index.html"><img src="assets/img/brand/logo.webp" alt="" width="44" height="44">
+      <span><span class="brand__name">MOSAIC</span><span class="brand__sub">Lebanese Restaurant</span></span></a>
+    <button class="nav-toggle" type="button" data-drawer-close aria-label="Close menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></button>
+  </div>
+  <nav aria-label="Mobile"><a href="menu.html">Menu</a><a href="story.html">Our Story</a><a href="catering.html">Catering</a><a href="awards.html">Awards</a><a href="contact.html">Contact</a></nav>
+  <div class="drawer__cta">
+    <a class="btn btn--primary" href="contact.html#book">Book a Table</a>
+    <a class="btn btn--ghost" href="menu.html">Order Online</a>
+  </div>
+</div>
+<main id="main">
+<section class="banner">
+  <img class="banner__bg" src="assets/img/rooms/platter.webp" alt="" loading="eager">
+  <div class="banner__scrim"></div>
+  <div class="wrap"><span class="eyebrow">The menu</span><h1>Two hundred and fifty dishes.</h1>
+    <p class="lede" style="max-width:640px;">One menu, served the same way at both addresses, from eight in the morning until half past eleven at night.</p></div>
+</section>
+<div class="mtools">
+  <div class="wrap">
+    <div class="mtools__row">
+      <label class="msearch"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.7"/><path d="m16 16 4.4 4.4"/></svg>
+        <input id="menu-search" type="search" placeholder="Search 250 dishes…" aria-label="Search the menu">
+        <button id="menu-clear" type="button" aria-label="Clear search" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></button>
+      </label>
+      <span class="mcount"><span class="num" id="menu-count">250</span> shown</span>
+      <span style="flex:1"></span>
+      <a class="btn btn--primary btn--sm" href="contact.html#book">Book a Table</a>
+    </div>
+    <div class="mchips" id="menu-chips"></div>
+  </div>
+</div>
+
+<div class="band band--tight" id="menu-main"><div class="wrap">
+  <div class="mlayout">
+    <aside class="rail" id="menu-rail" aria-label="Menu categories"></aside>
+    <div>
+      <div class="mhead">
+        <h2 id="menu-title">The whole menu</h2>
+        <p id="menu-sub">All 250 dishes, every category</p>
+      </div>
+      <div class="dishgrid" id="menu-root"></div>
+      <p id="menu-empty" class="lede" hidden>Nothing matched that search. Try a dish name or an ingredient.</p>
+      <div id="menu-more-wrap" style="display:flex;justify-content:center;margin-top:clamp(26px,4vw,44px);" hidden>
+        <button class="btn btn--ghost" type="button" id="menu-more">Show more dishes</button>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-col">
+        <a class="brand" href="index.html"><img src="assets/img/brand/logo.webp" alt="" width="44" height="44">
+          <span><span class="brand__name">MOSAIC</span><span class="brand__sub">Lebanese Restaurant</span></span></a>
+        <p style="max-width:280px;margin-top:6px;">A kaleidoscope of Lebanese dishes, served in Abu Dhabi
+           across two addresses.</p>
+        <div class="socials"><a href="https://www.instagram.com/mosaic.restaurant" target="_blank" rel="noopener" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.1"/><circle cx="17.3" cy="6.7" r=".9" fill="currentColor" stroke="none"/></svg></a><a href="https://www.facebook.com/mosaic.lebanese.restaurant" target="_blank" rel="noopener" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.6 8.4V6.9c0-.8.4-1.2 1.3-1.2h1.4V2.9h-2.4c-2.5 0-3.7 1.5-3.7 3.7v1.8H9v2.9h2.2V21h3.4v-9.7h2.4l.4-2.9Z"/></svg></a><a href="https://www.tiktok.com/@mosaic.ae" target="_blank" rel="noopener" aria-label="TikTok"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.2 3h2.6a4.9 4.9 0 0 0 4.2 4.3v2.6a7.5 7.5 0 0 1-4.2-1.4v6.1a5.7 5.7 0 1 1-5.7-5.7c.3 0 .6 0 .9.1v2.7a3 3 0 1 0 2.2 2.9Z"/></svg></a><a href="https://www.youtube.com/@mosaic.restaurant" target="_blank" rel="noopener" aria-label="YouTube"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.6" y="5.4" width="18.8" height="13.2" rx="3.6"/><path d="m10.4 9.4 5 2.6-5 2.6Z"/></svg></a><a href="https://www.linkedin.com/company/mosaic-lebanese-restaurant" target="_blank" rel="noopener" aria-label="LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2.4"/><path d="M7.4 10.4V17"/><circle cx="7.4" cy="7.2" r="1.1" fill="currentColor" stroke="none"/><path d="M11.6 17v-3.7a2.1 2.1 0 0 1 4.2 0V17"/><path d="M11.6 10.4V17"/></svg></a></div>
+      </div>
+    <div class="foot-col">
+      <h4>Al Muroor</h4>
+      <p>Al Sa&rsquo;ada area, Al Rumaithi street<br>Guardian Towers, Abu Dhabi</p>
+      <a href="tel:022340202" class="num">02 234 0202</a>
+    </div>
+    <div class="foot-col">
+      <h4>Al Najda</h4>
+      <p>Mohammed Bin Butti street, facing Al Sultan Bakery<br>Vision Towers, Abu Dhabi</p>
+      <a href="tel:026226122" class="num">02 622 6122</a>
+    </div>
+      <div class="foot-col">
+        <h4>Opening hours</h4>
+        <p class="num">Sat &ndash; Thu &nbsp;8:00 &ndash; 23:30<br>Friday &nbsp;13:30 &ndash; 23:30</p>
+        <a href="mailto:info@mosaic-ae.com">info@mosaic-ae.com</a>
+        <a href="mailto:catering@mosaic-ae.com">catering@mosaic-ae.com</a>
+      </div>
+    </div>
+    <hr class="hair" style="margin:clamp(28px,4vw,44px) 0 0;">
+    <div class="foot-bottom">
+      <span>Mosaic Lebanese Restaurant &middot; Abu Dhabi</span>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;">
+        <a href="#">Mosaic Catering</a><a href="#">La Tartine P&acirc;tisserie</a>
+        <a href="#">Nazira Kitchen</a><a href="#">Salatoush</a><a href="#">Space Bun</a>
+      </div>
+    </div>
+  </div>
+</footer>
+<script src="assets/js/booking-store.js" defer></script>
+<script src="assets/js/cart.js" defer></script>
+<script src="assets/js/site.js" defer></script>
+<script src="assets/js/menu.js" defer></script></body>
+</html>

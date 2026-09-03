@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reports — Mosaic Crew</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#141928">
+<link rel="icon" href="../assets/img/brand/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=PT+Sans:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/crew.css">
+</head>
+<body class="crew">
+<div id="crew-shell"></div>
+<main id="crew-main" hidden>
+
+  <div class="crew-title"><div><h1>Reports</h1><p>Operational snapshot.</p></div></div>
+  <div class="qgrid" id="rep-stats"></div>
+  <div class="panel-c" style="margin-top:16px;padding:20px;"><div id="rep-body"></div></div>
+
+</main>
+<script src="../assets/js/vendor/supabase.min.js"></script>
+<script src="../assets/js/crew/config.js"></script>
+<script src="../assets/js/crew/auth.js"></script>
+<script src="../assets/js/crew/shell.js"></script>
+<script>
+window.pageInit = async function(c){
+  var o=await Crew.sb.from('orders').select('status,priority,created_at,completed_at,restaurant_id');
+  var rows=o.data||[];
+  var done=rows.filter(function(x){return x.completed_at;});
+  var avg=done.length? Math.round(done.reduce(function(s,x){
+    return s+(new Date(x.completed_at)-new Date(x.created_at))/60000;},0)/done.length):0;
+  document.getElementById('rep-stats').innerHTML=
+    [['Orders total',rows.length],['Completed',done.length],
+     ['Urgent',rows.filter(function(x){return x.priority==='URGENT';}).length],
+     ['Avg minutes',avg]].map(function(s){
+      return '<div class="qcell"><b>'+s[1]+'</b><span>'+s[0]+'</span></div>';}).join('');
+  var by={}; rows.forEach(function(x){by[x.status]=(by[x.status]||0)+1;});
+  document.getElementById('rep-body').innerHTML='<h2 style="font-size:16px;margin-bottom:10px">By status</h2>'+
+    Object.keys(by).map(function(k){return '<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--crew-line);font-size:13.5px"><span>'+k+'</span><b>'+by[k]+'</b></div>';}).join('');
+};
+</script><script>(async function(){var c = await Crew.requirePage('reports');if(!c) return;CrewShell.render(c);if (window.CrewNotify) CrewNotify.mount(c);document.getElementById("crew-main").hidden = false;if (window.pageInit) window.pageInit(c);})();</script></body>
+</html>

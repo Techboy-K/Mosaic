@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Restaurants — Mosaic Crew</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#141928">
+<link rel="icon" href="../assets/img/brand/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=PT+Sans:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/crew.css">
+</head>
+<body class="crew">
+<div id="crew-shell"></div>
+<main id="crew-main" hidden>
+
+  <div class="crew-title"><div><h1>Restaurants</h1>
+    <p>Both branches run one menu. Staff see only the branches they are assigned to.</p></div></div>
+  <div id="rest-list" class="grid grid--2" style="gap:14px;"></div>
+
+</main>
+<script src="../assets/js/vendor/supabase.min.js"></script>
+<script src="../assets/js/crew/config.js"></script>
+<script src="../assets/js/crew/auth.js"></script>
+<script src="../assets/js/crew/shell.js"></script>
+<script>
+window.pageInit = async function(c){
+  var r = await Crew.sb.from('restaurants').select('*').order('name');
+  var counts = await Crew.sb.from('user_restaurants').select('restaurant_id');
+  var n={}; (counts.data||[]).forEach(function(x){n[x.restaurant_id]=(n[x.restaurant_id]||0)+1;});
+  var may = Crew.can('restaurants.edit');
+  document.getElementById('rest-list').innerHTML = (r.data||[]).map(function(x){
+    return '<div class="panel-c" style="padding:20px;display:flex;flex-direction:column;gap:10px;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;">'+
+        '<h2 style="font-size:20px;">'+x.name+'</h2>'+
+        '<span class="badge '+(x.is_active?'badge--ok':'badge--off')+'">'+(x.is_active?'open':'closed')+'</span></div>'+
+      '<p style="font-size:13px;color:var(--muted);">'+(x.address||'')+'</p>'+
+      '<p style="font-size:13px;">'+(x.phone||'')+' &middot; '+(n[x.id]||0)+' staff</p>'+
+      (may?'<label class="fld"><span>Phone</span><input value="'+(x.phone||'')+'" data-rid="'+x.id+'" data-f="phone"></label>'+
+           '<label class="fld"><span>Address</span><input value="'+(x.address||'')+'" data-rid="'+x.id+'" data-f="address"></label>'+
+           '<button class="btn btn--wine btn--sm" data-save="'+x.id+'">Save</button>':'')+
+    '</div>'; }).join('');
+  document.querySelectorAll('[data-save]').forEach(function(b){
+    b.onclick=async function(){
+      var id=b.dataset.save, patch={};
+      document.querySelectorAll('[data-rid="'+id+'"]').forEach(function(i){patch[i.dataset.f]=i.value;});
+      var u=await Crew.sb.from('restaurants').update(patch).eq('id',id);
+      if(u.error) return alert(u.error.message);
+      await Crew.sb.from('audit_logs').insert({actor_id:c.user.id,actor_email:c.profile.email,
+        action:'restaurant.updated',resource:'restaurants',resource_id:id,after:patch});
+      b.textContent='Saved'; setTimeout(function(){b.textContent='Save';},1500);
+    };});
+};
+</script><script>(async function(){var c = await Crew.requirePage('restaurants');if(!c) return;CrewShell.render(c);if (window.CrewNotify) CrewNotify.mount(c);document.getElementById("crew-main").hidden = false;if (window.pageInit) window.pageInit(c);})();</script></body>
+</html>

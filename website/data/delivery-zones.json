@@ -1,0 +1,16 @@
+{
+  "_note": "PLACEHOLDER COVERAGE — TO CONFIRM WITH MOSAIC. Their real zones are not published on the site (the WooCommerce shipping-zones endpoint requires auth). Areas, fees, minimums and ETAs below are structured correctly but the values are assumptions. Edit this file and the checkout updates itself.",
+  "currency": "AED",
+  "zones": [
+    { "id": "z1", "name": "Abu Dhabi Island — central", "fee": 0,  "min": 50,  "eta": "30–45 min",
+      "areas": ["Al Muroor", "Al Najda", "Al Nahyan", "Al Danah", "Tourist Club Area", "Al Zahiyah",
+                "Madinat Zayed", "Al Khalidiyah", "Al Bateen", "Al Manhal", "Al Karamah", "Al Mushrif"] },
+    { "id": "z2", "name": "Abu Dhabi Island — outer", "fee": 12, "min": 75,  "eta": "45–60 min",
+      "areas": ["Corniche", "Al Ras Al Akhdar", "Marina Village", "Al Maryah Island", "Al Reem Island",
+                "Saadiyat Island", "Al Raha Beach"] },
+    { "id": "z3", "name": "Mainland", "fee": 20, "min": 120, "eta": "60–80 min",
+      "areas": ["Khalifa City", "Mohammed Bin Zayed City", "Al Shamkha", "Al Rahba", "Masdar City",
+                "Yas Island", "Al Shahama"] }
+  ],
+  "outside_message": "We don’t deliver to that area yet — but both branches do takeaway, and Mosaic Catering covers the whole emirate."
+}
